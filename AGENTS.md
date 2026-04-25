@@ -35,7 +35,7 @@ Preferencias Generales:
 - Todos los textos visibles de la web quiero que estén en español.
 
 Preferencias de diseño:
-- Basate en las imagenes del diseño que tienes en la carpeta designs del proyecto.
+- Mantén coherencia visual con `assets/css/styles.css` y el sistema de componentes BEM del proyecto.
 
 Preferencias de estilos:
 - Colores (los del diseño)
@@ -58,7 +58,6 @@ Preferencias de código:
 - Si el agente duda, que revise las especificaciones del proyecto y si no que pregunte al usuario.
 
 Estructura de archivos:
-- carpeta designs
 - carpeta assets
     - carpeta css
     - carpeta js

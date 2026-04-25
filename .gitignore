@@ -1,0 +1,28 @@
+# Claves (nunca en git)
+assets/js/config.js
+.env
+.env.local
+.env.*.local
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Node (por si añades tooling más adelante)
+node_modules/
+dist/
+*.log
+
+# Artefactos locales (MCP / depuración en raíz del repo)
+mcp-*.json
+mcp-exec-*.json
+mcp-payload-*.json
+_last_chunk_sql.txt
+_mcp_next_query.txt
+.mcp-last-query.json
+
+# Restos de semillas vía MCP (no usados por el flujo `npm run seed`)
+supabase/.seed_batches/
+supabase/seed_mcp_parts/
+supabase/seed_all_execute.sql
+supabase/.temp/

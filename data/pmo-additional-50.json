@@ -1,0 +1,1016 @@
+{
+  "version": 1,
+  "label": "50 solicitudes adicionales (id 51–100), estatus variados",
+  "count": 50,
+  "requests": [
+    {
+      "id": 51,
+      "title": "Ciberseguridad Zero Trust en sucursales",
+      "status": "Borrador",
+      "stage": "pmo",
+      "date": "2025-10-15",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "ti",
+      "prioridad": "alta",
+      "tipoProyecto": "infraestructura",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "120000",
+      "fechaEstimadaInicio": "2026-01-01",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-10-15",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 52,
+      "title": "Repositorio de datos gobernado (Data Lakehouse)",
+      "status": "Borrador",
+      "stage": "pmo",
+      "date": "2025-10-14",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "finanzas",
+      "prioridad": "media",
+      "tipoProyecto": "desarrollo",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "137341",
+      "fechaEstimadaInicio": "2026-02-02",
+      "comments": [
+        {
+          "author": "admin@banco.com",
+          "date": "2025-10-14",
+          "text": "Comentario de seguimiento de la PMO: documentar hitos y dependencias técnicas."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 53,
+      "title": "App móvil de inversiones con perfil de riesgo",
+      "status": "Borrador",
+      "stage": "pmo",
+      "date": "2025-10-13",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "operaciones",
+      "prioridad": "baja",
+      "tipoProyecto": "integracion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "154682",
+      "fechaEstimadaInicio": "2026-03-03",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 54,
+      "title": "Sistema de scoring ESG para crédito corporativo",
+      "status": "Borrador",
+      "stage": "pmo",
+      "date": "2025-10-12",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "riesgos",
+      "prioridad": "alta",
+      "tipoProyecto": "seguridad",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "172023",
+      "fechaEstimadaInicio": "2026-04-04",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-10-12",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 55,
+      "title": "Plataforma de nómina multinacional (LatAm)",
+      "status": "Borrador",
+      "stage": "pmo",
+      "date": "2025-10-11",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "recursos_humanos",
+      "prioridad": "media",
+      "tipoProyecto": "analitica",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "189364",
+      "fechaEstimadaInicio": "2026-05-05",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 56,
+      "title": "Monitoreo de transacciones en tiempo real (RTGS)",
+      "status": "Borrador",
+      "stage": "pmo",
+      "date": "2025-10-10",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "marketing",
+      "prioridad": "baja",
+      "tipoProyecto": "transformacion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "206705",
+      "fechaEstimadaInicio": "2026-06-06",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 57,
+      "title": "Portal de provisión de caja para corresponsales",
+      "status": "Borrador",
+      "stage": "pmo",
+      "date": "2025-10-09",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "ti",
+      "prioridad": "alta",
+      "tipoProyecto": "infraestructura",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "224046",
+      "fechaEstimadaInicio": "2026-07-07",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-10-09",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        },
+        {
+          "author": "admin@banco.com",
+          "date": "2025-10-09",
+          "text": "Comentario de seguimiento de la PMO: documentar hitos y dependencias técnicas."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 58,
+      "title": "Herramienta de simulación de estrés (CCAR local)",
+      "status": "Borrador",
+      "stage": "pmo",
+      "date": "2025-10-08",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "finanzas",
+      "prioridad": "media",
+      "tipoProyecto": "desarrollo",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "241387",
+      "fechaEstimadaInicio": "2026-08-08",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 59,
+      "title": "Integración core–intercambio de información tributaria",
+      "status": "En Revisión",
+      "stage": "pmo",
+      "date": "2025-10-07",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "operaciones",
+      "prioridad": "baja",
+      "tipoProyecto": "integracion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "258728",
+      "fechaEstimadaInicio": "2026-01-09",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 60,
+      "title": "Digitalización de expedientes de crédito hipotecario",
+      "status": "En Revisión",
+      "stage": "pmo",
+      "date": "2025-10-06",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "riesgos",
+      "prioridad": "alta",
+      "tipoProyecto": "seguridad",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "276069",
+      "fechaEstimadaInicio": "2026-02-10",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-10-06",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 61,
+      "title": "Motor de ofertas personalizadas en banca móvil",
+      "status": "En Revisión",
+      "stage": "pmo",
+      "date": "2025-10-05",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "recursos_humanos",
+      "prioridad": "media",
+      "tipoProyecto": "analitica",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "293410",
+      "fechaEstimadaInicio": "2026-03-11",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 62,
+      "title": "Herramienta de gobierno de APIs internas",
+      "status": "En Revisión",
+      "stage": "pmo",
+      "date": "2025-10-04",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "marketing",
+      "prioridad": "baja",
+      "tipoProyecto": "transformacion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "310751",
+      "fechaEstimadaInicio": "2026-04-12",
+      "comments": [
+        {
+          "author": "admin@banco.com",
+          "date": "2025-10-04",
+          "text": "Comentario de seguimiento de la PMO: documentar hitos y dependencias técnicas."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 63,
+      "title": "Actualización de firma digital y OTP para PYME",
+      "status": "En Revisión",
+      "stage": "pmo",
+      "date": "2025-10-03",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "ti",
+      "prioridad": "alta",
+      "tipoProyecto": "infraestructura",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "328092",
+      "fechaEstimadaInicio": "2026-05-13",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-10-03",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 64,
+      "title": "Data quality para reportes de lavado de activos",
+      "status": "En Revisión",
+      "stage": "pmo",
+      "date": "2025-10-02",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "finanzas",
+      "prioridad": "media",
+      "tipoProyecto": "desarrollo",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "345433",
+      "fechaEstimadaInicio": "2026-06-14",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 65,
+      "title": "Sistema de gestión de límite de canje intradía",
+      "status": "En Revisión",
+      "stage": "pmo",
+      "date": "2025-10-01",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "operaciones",
+      "prioridad": "baja",
+      "tipoProyecto": "integracion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "362774",
+      "fechaEstimadaInicio": "2026-07-15",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 66,
+      "title": "Nueva pasarela de recaudo de impuestos regionales",
+      "status": "En Revisión",
+      "stage": "tecnica",
+      "date": "2025-09-30",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "riesgos",
+      "prioridad": "alta",
+      "tipoProyecto": "seguridad",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "380115",
+      "fechaEstimadaInicio": "2026-08-16",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-09-30",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 67,
+      "title": "Observabilidad APM para apps críticas del banco",
+      "status": "En Revisión",
+      "stage": "tecnica",
+      "date": "2025-09-29",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "recursos_humanos",
+      "prioridad": "media",
+      "tipoProyecto": "analitica",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "397456",
+      "fechaEstimadaInicio": "2026-01-17",
+      "comments": [
+        {
+          "author": "admin@banco.com",
+          "date": "2025-09-29",
+          "text": "Comentario de seguimiento de la PMO: documentar hitos y dependencias técnicas."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 68,
+      "title": "Renovación de certificados PKI y HSM",
+      "status": "En Revisión",
+      "stage": "tecnica",
+      "date": "2025-09-28",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "marketing",
+      "prioridad": "baja",
+      "tipoProyecto": "transformacion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "414797",
+      "fechaEstimadaInicio": "2026-02-18",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 69,
+      "title": "Hub de notificaciones omnicanal (push/SMS/email)",
+      "status": "En Revisión",
+      "stage": "tecnica",
+      "date": "2025-09-27",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "ti",
+      "prioridad": "alta",
+      "tipoProyecto": "infraestructura",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "432138",
+      "fechaEstimadaInicio": "2026-03-19",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-09-27",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 70,
+      "title": "Herramienta de modelado de escenarios de liquidez",
+      "status": "En Revisión",
+      "stage": "tecnica",
+      "date": "2025-09-26",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "finanzas",
+      "prioridad": "media",
+      "tipoProyecto": "desarrollo",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "449479",
+      "fechaEstimadaInicio": "2026-04-20",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 71,
+      "title": "Modernización de depósito a plazo digital",
+      "status": "En Revisión",
+      "stage": "tecnica",
+      "date": "2025-09-25",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "operaciones",
+      "prioridad": "baja",
+      "tipoProyecto": "integracion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "466820",
+      "fechaEstimadaInicio": "2026-05-01",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 72,
+      "title": "Sistema de prevención de fraude en canal telefónico",
+      "status": "En Revisión",
+      "stage": "tecnica",
+      "date": "2025-09-24",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "riesgos",
+      "prioridad": "alta",
+      "tipoProyecto": "seguridad",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "484161",
+      "fechaEstimadaInicio": "2026-06-02",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-09-24",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        },
+        {
+          "author": "admin@banco.com",
+          "date": "2025-09-24",
+          "text": "Comentario de seguimiento de la PMO: documentar hitos y dependencias técnicas."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 73,
+      "title": "Cálculo de provisión bajo NIIF 9 (IFRS 9)",
+      "status": "En Revisión",
+      "stage": "tecnica",
+      "date": "2025-09-23",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "recursos_humanos",
+      "prioridad": "media",
+      "tipoProyecto": "analitica",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "501502",
+      "fechaEstimadaInicio": "2026-07-03",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 74,
+      "title": "Billetera móvil white-label para alianzas",
+      "status": "En Revisión",
+      "stage": "director",
+      "date": "2025-09-22",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "marketing",
+      "prioridad": "baja",
+      "tipoProyecto": "transformacion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "518843",
+      "fechaEstimadaInicio": "2026-08-04",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 75,
+      "title": "Sistema de inventario y custodia de valores",
+      "status": "En Revisión",
+      "stage": "director",
+      "date": "2025-09-21",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "ti",
+      "prioridad": "alta",
+      "tipoProyecto": "infraestructura",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "536184",
+      "fechaEstimadaInicio": "2026-01-05",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-09-21",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 76,
+      "title": "Evaluación de riesgo climático en cartera",
+      "status": "En Revisión",
+      "stage": "director",
+      "date": "2025-09-20",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "finanzas",
+      "prioridad": "media",
+      "tipoProyecto": "desarrollo",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "553525",
+      "fechaEstimadaInicio": "2026-02-06",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 77,
+      "title": "Renovación de red SD-WAN para 40 sucursales",
+      "status": "En Revisión",
+      "stage": "director",
+      "date": "2025-09-19",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "operaciones",
+      "prioridad": "baja",
+      "tipoProyecto": "integracion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "570866",
+      "fechaEstimadaInicio": "2026-03-07",
+      "comments": [
+        {
+          "author": "admin@banco.com",
+          "date": "2025-09-19",
+          "text": "Comentario de seguimiento de la PMO: documentar hitos y dependencias técnicas."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 78,
+      "title": "Backoffice de tarjetas prepago con monedero",
+      "status": "En Revisión",
+      "stage": "director",
+      "date": "2025-09-18",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "riesgos",
+      "prioridad": "alta",
+      "tipoProyecto": "seguridad",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "588207",
+      "fechaEstimadaInicio": "2026-04-08",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-09-18",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 79,
+      "title": "Plataforma de colaboración segura (M365 hardening)",
+      "status": "En Revisión",
+      "stage": "director",
+      "date": "2025-09-17",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "recursos_humanos",
+      "prioridad": "media",
+      "tipoProyecto": "analitica",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "605548",
+      "fechaEstimadaInicio": "2026-05-09",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 80,
+      "title": "Catálogo de productos y pricing para banca comercial",
+      "status": "En Revisión",
+      "stage": "director",
+      "date": "2025-09-16",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "marketing",
+      "prioridad": "baja",
+      "tipoProyecto": "transformacion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "622889",
+      "fechaEstimadaInicio": "2026-06-10",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 81,
+      "title": "Sistema de workflow para órdenes de compra (CAPEX)",
+      "status": "Aprobado",
+      "stage": "director",
+      "date": "2025-09-15",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "ti",
+      "prioridad": "alta",
+      "tipoProyecto": "infraestructura",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "640230",
+      "fechaEstimadaInicio": "2026-07-11",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-09-15",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 82,
+      "title": "Integración con buró de crédito alternativo (open data)",
+      "status": "Aprobado",
+      "stage": "director",
+      "date": "2025-09-14",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "finanzas",
+      "prioridad": "media",
+      "tipoProyecto": "desarrollo",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "657571",
+      "fechaEstimadaInicio": "2026-08-12",
+      "comments": [
+        {
+          "author": "admin@banco.com",
+          "date": "2025-09-14",
+          "text": "Comentario de seguimiento de la PMO: documentar hitos y dependencias técnicas."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 83,
+      "title": "Herramienta de cálculo de reservas técnicas (seguros)",
+      "status": "Aprobado",
+      "stage": "director",
+      "date": "2025-09-13",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "operaciones",
+      "prioridad": "baja",
+      "tipoProyecto": "integracion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "674912",
+      "fechaEstimadaInicio": "2026-01-13",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 84,
+      "title": "Mesa de ayuda con CMDB y ITIL",
+      "status": "Aprobado",
+      "stage": "director",
+      "date": "2025-09-12",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "riesgos",
+      "prioridad": "alta",
+      "tipoProyecto": "seguridad",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "692253",
+      "fechaEstimadaInicio": "2026-02-14",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-09-12",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 85,
+      "title": "Optimización de arqueo y transporte de efectivo",
+      "status": "Aprobado",
+      "stage": "director",
+      "date": "2025-09-11",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "recursos_humanos",
+      "prioridad": "media",
+      "tipoProyecto": "analitica",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "709594",
+      "fechaEstimadaInicio": "2026-03-15",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 86,
+      "title": "Sondeo de opinión de clientes (VoC) post-transacción",
+      "status": "Aprobado",
+      "stage": "director",
+      "date": "2025-09-10",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "marketing",
+      "prioridad": "baja",
+      "tipoProyecto": "transformacion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "726935",
+      "fechaEstimadaInicio": "2026-04-16",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 87,
+      "title": "Diseño de arquitectura de recuperación DRP actualizada",
+      "status": "Aprobado",
+      "stage": "director",
+      "date": "2025-09-09",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "ti",
+      "prioridad": "alta",
+      "tipoProyecto": "infraestructura",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "744276",
+      "fechaEstimadaInicio": "2026-05-17",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-09-09",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        },
+        {
+          "author": "admin@banco.com",
+          "date": "2025-09-09",
+          "text": "Comentario de seguimiento de la PMO: documentar hitos y dependencias técnicas."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 88,
+      "title": "Libro de órdenes y matching para bonos internacionales",
+      "status": "Aprobado",
+      "stage": "director",
+      "date": "2025-09-08",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "finanzas",
+      "prioridad": "media",
+      "tipoProyecto": "desarrollo",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "761617",
+      "fechaEstimadaInicio": "2026-06-18",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 89,
+      "title": "Renovación de anti-malware y EDR en endpoints",
+      "status": "Rechazado",
+      "stage": "pmo",
+      "date": "2025-09-07",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "operaciones",
+      "prioridad": "baja",
+      "tipoProyecto": "integracion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "778958",
+      "fechaEstimadaInicio": "2026-07-19",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 90,
+      "title": "Data lineage para reportes de supervisión bancaria",
+      "status": "Rechazado",
+      "stage": "pmo",
+      "date": "2025-09-06",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "riesgos",
+      "prioridad": "alta",
+      "tipoProyecto": "seguridad",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "796299",
+      "fechaEstimadaInicio": "2026-08-20",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-09-06",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 91,
+      "title": "Herramienta de cierre contable bajo NIIF (consolidación)",
+      "status": "Rechazado",
+      "stage": "pmo",
+      "date": "2025-09-05",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "recursos_humanos",
+      "prioridad": "media",
+      "tipoProyecto": "analitica",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "813640",
+      "fechaEstimadaInicio": "2026-01-01",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 92,
+      "title": "Experiencia unificada en cajeros con biometría",
+      "status": "Rechazado",
+      "stage": "pmo",
+      "date": "2025-09-04",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "marketing",
+      "prioridad": "baja",
+      "tipoProyecto": "transformacion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "830981",
+      "fechaEstimadaInicio": "2026-02-02",
+      "comments": [
+        {
+          "author": "admin@banco.com",
+          "date": "2025-09-04",
+          "text": "Comentario de seguimiento de la PMO: documentar hitos y dependencias técnicas."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 93,
+      "title": "Sistema de licitación inversa de servicios TI",
+      "status": "Requiere Cambios",
+      "stage": "pmo",
+      "date": "2025-09-03",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "ti",
+      "prioridad": "alta",
+      "tipoProyecto": "infraestructura",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "848322",
+      "fechaEstimadaInicio": "2026-03-03",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-09-03",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 94,
+      "title": "Portal de vinculación de proveedores (Know Your Supplier)",
+      "status": "Requiere Cambios",
+      "stage": "pmo",
+      "date": "2025-09-02",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "finanzas",
+      "prioridad": "media",
+      "tipoProyecto": "desarrollo",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "865663",
+      "fechaEstimadaInicio": "2026-04-04",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 95,
+      "title": "Cálculo y reporting de GAR (Garantías adecuadas)",
+      "status": "Requiere Cambios",
+      "stage": "pmo",
+      "date": "2025-09-01",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "operaciones",
+      "prioridad": "baja",
+      "tipoProyecto": "integracion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "883004",
+      "fechaEstimadaInicio": "2026-05-05",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 96,
+      "title": "Herramienta de análisis de cartera bursátil in-house",
+      "status": "Requiere Cambios",
+      "stage": "pmo",
+      "date": "2025-08-31",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "riesgos",
+      "prioridad": "alta",
+      "tipoProyecto": "seguridad",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "900345",
+      "fechaEstimadaInicio": "2026-06-06",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-08-31",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 97,
+      "title": "Renovación de acuerdos con procesadores de tarjetas",
+      "status": "Cerrado",
+      "stage": "director",
+      "date": "2025-08-30",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "recursos_humanos",
+      "prioridad": "media",
+      "tipoProyecto": "analitica",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "917686",
+      "fechaEstimadaInicio": "2026-07-07",
+      "comments": [
+        {
+          "author": "admin@banco.com",
+          "date": "2025-08-30",
+          "text": "Comentario de seguimiento de la PMO: documentar hitos y dependencias técnicas."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 98,
+      "title": "Módulo de reportes Pillar 3 (disciplina de mercado)",
+      "status": "Cerrado",
+      "stage": "director",
+      "date": "2025-08-29",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "marketing",
+      "prioridad": "baja",
+      "tipoProyecto": "transformacion",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "935027",
+      "fechaEstimadaInicio": "2026-08-08",
+      "comments": [],
+      "implementation": null
+    },
+    {
+      "id": 99,
+      "title": "Gobernanza de datos y catálogo de términos (Data Mesh)",
+      "status": "Cerrado",
+      "stage": "director",
+      "date": "2025-08-28",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "ti",
+      "prioridad": "alta",
+      "tipoProyecto": "infraestructura",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "952368",
+      "fechaEstimadaInicio": "2026-01-09",
+      "comments": [
+        {
+          "author": "solicitantepmomanagement@gmail.com",
+          "date": "2025-08-28",
+          "text": "Solicitud registrada en el portafolio de iniciativas 2025–2026 para evaluación de la PMO."
+        }
+      ],
+      "implementation": null
+    },
+    {
+      "id": 100,
+      "title": "Programa de continuidad del negocio (BCP) digitalizado",
+      "status": "Cerrado",
+      "stage": "director",
+      "date": "2025-08-27",
+      "applicant": "solicitantepmomanagement@gmail.com",
+      "area": "finanzas",
+      "prioridad": "media",
+      "tipoProyecto": "desarrollo",
+      "necesidad": "La iniciativa atiende una brecha operativa o regulatoria identificada en el mapa de riesgos y en el comité de arquitectura. Se requiere inversión acotada y plan de despliegue faseado.",
+      "impacto": "Se espera mejora medible en eficiencia, control o experiencia, alineada a los OKRs de la transformación bancaria y a exigencias de la SFC.",
+      "presupuestoEstimado": "969709",
+      "fechaEstimadaInicio": "2026-02-10",
+      "comments": [],
+      "implementation": null
+    }
+  ]
+}

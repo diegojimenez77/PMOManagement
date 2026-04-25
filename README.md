@@ -2,7 +2,7 @@
 
 Aplicación web para la gestión centralizada de solicitudes de proyecto y del seguimiento de implementación post-aprobación, orientada a la Oficina de Gestión de Proyectos (PMO) de una institución bancaria.
 
-Está construida como **Single Page Application (SPA)** con **HTML5, CSS3 y JavaScript vanilla**, sin frameworks, sin bundler y sin dependencias JavaScript (solo fuentes y Material Symbols vía `index.html`), en línea con `AGENTS.md`.
+Está construida como **Single Page Application (SPA)** con **HTML5, CSS3 y JavaScript vanilla**, sin frameworks ni bundler. El backend vive en **Supabase** (Postgres, Auth, Storage); el bundle **`@supabase/supabase-js@2` está en el repo** (`assets/js/vendor/supabase.js`, UMD). Fuentes y Material Symbols siguen vía `index.html`, en línea con `AGENTS.md`.
 
 ---
 
@@ -11,24 +11,18 @@ Está construida como **Single Page Application (SPA)** con **HTML5, CSS3 y Java
 | Aspecto | Descripción |
 | --- | --- |
 | **Entrada** | `index.html` monta `#app-root`; toda la UI se genera con `document.createElement` (sin `innerHTML`). |
-| **Estado** | Objeto global `AppState` + persistencia en `localStorage` (clave `pmoAppState`, `STORAGE_VERSION: 5`). |
+| **Estado** | `AppState` en memoria; **sesión** vía Supabase Auth (el cliente conserva el token en `localStorage` internamente). **Solicitudes, comentarios y adjuntos** vienen de Postgres/Storage, no de `localStorage` de negocio. |
 | **Navegación** | `navigateTo(route, param)` con rutas por rol. |
 | **Estilos** | BEM, tokens en `:root`, `rem` con base 10px, diseño responsive. |
-| **Datos** | Carga inicial con muchas solicitudes de demostración (IIFE en `app.js`); al cambiar de versión de almacenamiento se restablece el seed. |
+| **Datos** | Carga desde Supabase. Opcional: poblar con `data/pmo-demo-seed.json` y `npm run seed` (véase [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md)). |
 
 ---
 
-## 2. Perfiles y credenciales (demo)
+## 2. Perfiles (Supabase Auth + `public.profiles`)
 
-La aplicación distingue **tres roles**. Las contraseñas son solo para prototipo; en producción no deben existir en el cliente.
+La aplicación distingue **tres roles** (`solicitante`, `admin`, `project_manager` en base de datos). Debes **crear los usuarios en el panel de Autenticación** de Supabase (email/contraseña) y asignar el **rol** en `public.profiles` (los nuevos se registran como solicitante vía trigger; admin y PM requieren actualización de rol). Valores de ejemplo: `solicitante@banco.com`, `admin@banco.com`, `pm@banco.com`. Las contraseñas las defines tú; no viven en el código.
 
-| Rol | Email | Contraseña | Propósito |
-| --- | --- | --- | --- |
-| **Solicitante** | `solicitante@banco.com` | `demo1234` | Presentar y dar seguimiento a solicitudes de proyecto. |
-| **Administrador PMO** | `admin@banco.com` | `admin1234` | Gobierno del portafolio, flujo de aprobación, métricas, vistas por etapa. |
-| **Project Manager** | `pm@banco.com` | `pm1234` | Solo solicitudes **ya aprobadas**; tablero Kanban de **implementación** y documentación por etapa. |
-
-Tras el login, `navigateToHome()` redirige al dashboard correspondiente al rol.
+Tras el login, `navigateToHome()` redirige al dashboard según el rol leído del perfil.
 
 ---
 
@@ -36,11 +30,9 @@ Tras el login, `navigateToHome()` redirige al dashboard correspondiente al rol.
 
 ### 3.1. Autenticación y sesión
 
-- El formulario de login valida email (regex) y contraseña no vacía.
-- Si las credenciales coinciden con `DEMO_CREDENTIALS`, se asigna `AppState.currentUser = { email, role }` y se llama a `saveState()`.
-- `loadState()` al iniciar: parsea JSON; si `version` no coincide con `STORAGE_VERSION`, borra la clave y se usa el seed embebido (migración “limpia” del demo).
-- `saveState()` persiste `version`, `currentUser` y `requests`. La vista activa no se persiste: al recargar vuelve al login o se restaura el usuario.
-- Cierre de sesión: limpia usuario, guarda y vuelve a `login`.
+- Rellene `assets/js/config.example.js` (o copie a `config.js` y apunte el `<script src>` de `index.html` allí) con la URL del proyecto y la clave **anon** pública: **Project Settings → API** en Supabase.
+- Login y registro usan `signInWithPassword` y `signUp` de `supabase-js`. Tras un login correcto se carga el perfil (`fetchCurrentProfile`) y `AppState.currentUser` recibe `id` (UUID), `email` y `role` mapeado desde la fila de `profiles`.
+- Al iniciar, `getSession` restaura la sesión; si no hay sesión, se muestra el login. **No** se persiste el usuario de negocio en `localStorage` propio; el cierre de sesión llama a `auth.signOut()` y limpia el estado.
 
 ### 3.2. Solicitante
 
@@ -61,7 +53,7 @@ Tras el login, `navigateToHome()` redirige al dashboard correspondiente al rol.
 ### 3.4. Project Manager (implementación)
 
 - Solo se listan solicitudes con `status` **Aprobado** o **Cerrado** (post-implementación).
-- Cada solicitud aprobada tiene un objeto `implementation`: etapa actual (`iniciacion` … `cierre`), documentos **simulados** por etapa (nombre de archivo, formato, fechas, autor), bitácora del PM, historial de movimientos de etapa.
+- Cada solicitud aprobada tiene un objeto `implementation`: etapa actual (`iniciacion` … `cierre`), documentos (datos de demo en JSONB al importar; **nuevas subidas** reales al bucket `documents` y metadatos en `request_document_files`, fusionados en la UI), bitácora del PM, historial de movimientos de etapa.
 - **Kanban de implementación:** seis columnas fijas: Iniciación, Análisis y Diseño, Construcción, Pruebas, Go Live, Cierre. Cada documento requerido por etapa se valida antes de **Avanzar a la siguiente**; en la última etapa, **Cerrar proyecto** pasa el estado a `Cerrado`.
 - **Filtro por tipo de proyecto:** barra de chips bajo el encabezado; filtra todas las columnas. El contador del título indica `X de N` proyectos.
 - **Documentación por etapa (desde el detalle del PM):** pantalla que agrupa **toda** la documentación anexada por etapa, con resumen y estado de completitud.
@@ -87,14 +79,21 @@ PMO/
 ├── index.html
 ├── AGENTS.md
 ├── README.md
+├── package.json
+├── data/                    # JSON para `npm run seed` (y alias de correo / UUIDs de demo)
+├── scripts/                 # seed-from-json, generate-pmo-additional-50, extract-demo-seed
+├── docs/
+│   └── SUPABASE_SETUP.md
 ├── assets/
 │   ├── css/styles.css
-│   └── js/app.js      # Toda la lógica, datos seed, vistas y gráficos (~7k líneas)
-├── designs/           # Mockups de referencia
-└── (opcional) canvases/ en el entorno Cursor — reportes visuales
+│   └── js/                  # app.js, pmoData.js, supabaseClient.js, config.example.js, vendor/supabase.js
+└── supabase/
+    ├── migrations/                      # Esquema Postgres versionado
+    ├── assign_admin_role_by_email.sql   # Útil tras crear usuarios en Auth
+    └── post_seed_setval_requests.sql   # Opcional: reajusta secuencia `requests_id_seq` tras cargar datos
 ```
 
-> **Nota:** El nombre de la clave de almacenamiento es **`pmoAppState`**, no `pmo_app_state`. Para “resetear” el demo: DevTools → Application → Local Storage → eliminar `pmoAppState`, o subir `STORAGE_VERSION` en código.
+> **Nota (Auth):** La sesión de Supabase vive en el almacenamiento que use el cliente JS de Auth (`localStorage` por defecto). Cerrar sesión desde la app o borrar el sitio en el navegador limpia la sesión; los datos de negocio están en Postgres/Storage, no en una clave local de demo.
 
 ---
 
@@ -118,12 +117,12 @@ Resumen de la auditoría de ingeniería sobre el repositorio (arquitectura, segu
 
 | Prioridad | Cantidad aprox. | Temas centrales |
 | --- | ---: | --- |
-| **Crítico** | 2 | Contraseñas y usuarios demo en claro en el cliente; `saveState()` sin `try/catch` (riesgo `QuotaExceededError` en `localStorage`). |
-| **Alto** | 5 | Sesión en `localStorage` expuesta a XSS; `app.js` monolítico; sin tests automatizados; seed masivo en el bundle; accesibilidad (foco, ARIA) incompleta. |
-| **Medio** | 6 | Validación y mutación de solicitudes duplicadas; sin migraciones incrementales; solo frontend; serialización completa en cada guardado; reset silencioso al cambiar versión; etc. |
-| **Bajo** | 2 | Pequeñas duplicaciones en utilidades de fecha; filtros de UI no persistidos (documentar o persistir). |
+| **Crítico** | — | *Reducido:* ya hay Supabase (Auth, datos, RLS) y claves reales en `config` (no en repo). Sigue el riesgo de la **anon key** y XSS si se compromete el front. |
+| **Alto** | 5 | `app.js` monolítico; sin tests automatizados; accesibilidad (foco, ARIA) incompleta; token de Auth en almacenamiento de sesión del cliente (higiene y CSP en producción). |
+| **Medio** | 6 | Validación duplicada con servidor; carga de listas en cliente; métricas recalculadas en cliente; etc. |
+| **Bajo** | 2 | Pequeñas duplicaciones en utilidades de fecha; filtros de UI no persistidos. |
 
-**Fortalezas a mantener:** DOM seguro (sin `innerHTML`), notificaciones propias, validación explícita, `STORAGE_VERSION` para versionar el esquema del demo, UI coherente y flujos de negocio ricos para una PoC.
+**Fortalezas a mantener:** DOM seguro (sin `innerHTML`), notificaciones propias, validación explícita, contrato con Postgres/RLS, UI coherente y flujos de negocio ricos.
 
 ---
 
@@ -180,8 +179,8 @@ Orden sugerido: **fundamentos que desbloquean el resto** → **seguridad y cumpl
 ## 8. Referencias
 
 - Especificación del agente y stack: `AGENTS.md`.
-- Mockups de partida: carpeta `designs/`.
 - Reporte de auditoría: **Sección 6** de este README; versión en canvas (Cursor IDE) si se generó en el proyecto.
+- **Supabase (base de datos + Storage):** guía paso a paso en [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md) y SQL en `supabase/migrations/`.
 
 ---
 

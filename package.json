@@ -1,0 +1,15 @@
+{
+  "name": "pmo-governance-portal",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "extract-seed": "node scripts/extract-demo-seed.mjs",
+    "seed": "node scripts/seed-from-json.mjs",
+    "gen:extra": "node scripts/generate-pmo-additional-50.mjs",
+    "seed:extra": "node scripts/seed-from-json.mjs data/pmo-additional-50.json",
+    "seed:all": "node scripts/seed-from-json.mjs && node scripts/seed-from-json.mjs data/pmo-additional-50.json"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.47.0"
+  }
+}

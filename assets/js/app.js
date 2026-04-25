@@ -6,9 +6,6 @@
 
 /* ------------------------------- Constantes ------------------------------ */
 
-const STORAGE_KEY = 'pmoAppState';
-const STORAGE_VERSION = 5;
-
 const STATUS = {
     DRAFT: 'Borrador',
     PENDING: 'En Revisión',
@@ -79,13 +76,14 @@ const TIPOS_PROYECTO = [
     { value: 'transformacion', label: 'Transformación Digital' }
 ];
 
-const DEMO_CREDENTIALS = {
-    solicitante: { email: 'solicitante@banco.com', password: 'demo1234' },
-    admin:       { email: 'admin@banco.com',        password: 'admin1234' },
-    pm:          { email: 'pm@banco.com',           password: 'pm1234'   }
-};
-
 const ROLE_PM = 'project_manager';
+
+/** Etiquetas de roles almacenados en public.profiles.role / requested_role */
+const DB_ROLE_LABELS = {
+    solicitante: 'Solicitante',
+    admin: 'Administrador',
+    project_manager: 'Project Manager'
+};
 
 const IMPL_STAGE = {
     INICIACION:   'iniciacion',
@@ -97,6 +95,12 @@ const IMPL_STAGE = {
 };
 
 const IMPL_STAGE_ORDER = ['iniciacion','analisis','construccion','pruebas','go_live','cierre'];
+
+/* EXPUESTO: pmoData.js (IIFE) usa window.IMPL_STAGE / window.IMPL_STAGE_ORDER al fusionar filas de Storage. */
+if (typeof window !== 'undefined') {
+    window.IMPL_STAGE_ORDER = IMPL_STAGE_ORDER;
+    window.IMPL_STAGE = IMPL_STAGE;
+}
 
 const IMPL_STAGES_CONFIG = [
     {
@@ -161,672 +165,7 @@ const IMPL_STAGES_CONFIG = [
 const AppState = {
     currentUser: null,
     currentView: null,
-    requests: (() => {
-        const A = 'admin@banco.com', S = 'solicitante@banco.com';
-        const c = (author, date, text) => ({ author, date, text });
-        const PEND = STATUS.PENDING, APPR = STATUS.APPROVED;
-        const DRAF = STATUS.DRAFT, CHAN = STATUS.CHANGES, REJE = STATUS.REJECTED;
-        const PMO = STAGE.PMO, TEC = STAGE.TECNICA, DIR = STAGE.DIRECTOR;
-
-        const req = (id, title, status, stage, date, area, prioridad, tipo, necesidad, impacto, presupuesto, fechaInicio, comments = [], implementation = null) => ({
-            id, title, status, stage, date,
-            applicant: S, area, prioridad,
-            tipoProyecto: tipo,
-            necesidad, impacto,
-            presupuestoEstimado: String(presupuesto),
-            fechaEstimadaInicio: fechaInicio,
-            comments,
-            implementation
-        });
-        /* helpers solo para proyectos con implementation */
-        const d  = (tag, name, format, date) => ({ id: `doc_${tag}`, tag, name, format, uploadedBy: 'pm@banco.com', uploadedAt: date });
-        const pm = (date, text) => ({ author: 'pm@banco.com', date, text });
-        const emptyDocs = () => ({ iniciacion:[], analisis:[], construccion:[], pruebas:[], go_live:[], cierre:[] });
-        const mkImpl = (stage, startedAt, docs, comments, history) => ({
-            stage, startedAt, assignedPM: 'pm@banco.com',
-            stageHistory: history,
-            documents: Object.assign(emptyDocs(), docs),
-            comments
-        });
-
-        return [
-        /* ── BORRADORES (10) ───────────────────────────────────────────────── */
-        req(1,'Plataforma de Identidad Digital (IAM)',DRAF,PMO,'2026-04-20','ti','alta','seguridad',
-            'La gestión de identidades y accesos se realiza con herramientas dispersas sin SSO ni MFA centralizado, exponiendo al banco a brechas y duplicidad de credenciales.',
-            'Reducción del 70% en incidentes de acceso no autorizado, SSO para 120 aplicaciones internas y cumplimiento NIST 800-63.',
-            1850000,'2026-10-01'),
-        req(2,'Sistema de Scoring Conductual de Clientes',DRAF,PMO,'2026-04-19','riesgos','alta','analitica',
-            'El modelo de riesgo crediticio actual sólo utiliza variables financieras estáticas, ignorando el comportamiento transaccional que predice la morosidad con mayor precisión.',
-            'Incremento del 22% en la tasa de predicción de impago y reducción de la pérdida esperada en $8M anuales mediante un modelo de ML actualizado en tiempo real.',
-            2100000,'2026-11-01'),
-        req(3,'Portal de Autoservicio Regulatorio',DRAF,PMO,'2026-04-18','operaciones','media','desarrollo',
-            'Las solicitudes de información regulatoria (SFC, UIAF, DIAN) se gestionan manualmente por un equipo de 6 personas con tiempos de respuesta promedio de 9 días.',
-            'Reducción del tiempo de respuesta regulatoria de 9 a 2 días, liberación de 4 FTE para actividades de mayor valor y eliminación de multas por incumplimiento de plazos.',
-            480000,'2026-09-15'),
-        req(4,'Renovación de Red ATM Nacional',DRAF,PMO,'2026-04-17','ti','alta','infraestructura',
-            'El 40% de la flota ATM opera con hardware de más de 8 años, con una tasa de indisponibilidad del 12%, el doble del estándar de la industria, generando pérdidas operativas.',
-            'Reducir la indisponibilidad de ATM al 3%, habilitar funciones de depósito inteligente y pagos de servicios, y mejorar la satisfacción en canal físico.',
-            3200000,'2026-08-01'),
-        req(5,'Campaña Digital para Captación Hipotecaria',DRAF,PMO,'2026-04-16','marketing','media','desarrollo',
-            'La captación de créditos hipotecarios se apoya exclusivamente en canales presenciales y llamadas outbound, sin presencia en motores de búsqueda ni comparadores digitales.',
-            'Incrementar la originación hipotecaria digital en un 35% durante los primeros 6 meses, reduciendo el CAC de $1.200 a $480 por cliente adquirido.',
-            390000,'2026-07-01'),
-        req(6,'Sistema de Control de Contratos Corporativos',DRAF,PMO,'2026-04-15','finanzas','media','integracion',
-            'Los contratos con proveedores y clientes corporativos se almacenan en repositorios dispersos sin alertas de vencimiento, generando renovaciones tácitas y contingencias legales.',
-            'Centralización de 4.200 contratos activos, alertas automáticas 90/60/30 días antes del vencimiento y reducción del 80% en renovaciones no gestionadas.',
-            650000,'2026-10-15'),
-        req(7,'Actualización ERP Financiero SAP S/4HANA',DRAF,PMO,'2026-04-14','finanzas','alta','infraestructura',
-            'El ERP financiero actual (SAP ECC 6.0) saldrá de soporte en 2027 y no soporta procesos de cierre en tiempo real, generando cierres mensuales de 5 días vs. 1 día en el benchmark.',
-            'Migración a SAP S/4HANA con cierre financiero en 1 día, habilitación de reporting en tiempo real y reducción del 30% en el tiempo dedicado a conciliaciones manuales.',
-            4800000,'2026-12-01'),
-        req(8,'Chatbot Bancario con IA Generativa',DRAF,PMO,'2026-04-13','marketing','baja','desarrollo',
-            'El contact center recibe 180.000 interacciones mensuales, de las cuales el 62% corresponde a consultas de saldo, movimientos y productos, que podrían automatizarse.',
-            'Deflexión del 55% de interacciones al chatbot, reducción del costo por interacción de $4.200 a $600 y mejora del NPS de servicio en 8 puntos.',
-            320000,'2026-08-15'),
-        req(9,'Plataforma E-learning Corporativa',DRAF,PMO,'2026-04-12','recursos_humanos','baja','desarrollo',
-            'El banco destina $2.1M anuales a capacitación presencial con una tasa de completitud del 34%, logística compleja y sin métricas de aprendizaje por colaborador.',
-            'Reducción del 60% en costos de capacitación, incremento de la tasa de completitud al 78% y habilitación de rutas de aprendizaje personalizadas por rol.',
-            210000,'2026-09-01'),
-        req(10,'Modernización del Middleware ESB',DRAF,PMO,'2026-04-11','ti','media','infraestructura',
-            'El ESB actual gestiona 3.200 integraciones con una latencia promedio de 800ms, limitando la capacidad de adoptar arquitecturas de microservicios y APIs en tiempo real.',
-            'Reducción de la latencia de integración a menos de 120ms, capacidad para 10.000 mensajes/segundo y habilitación de un modelo de integración basado en eventos.',
-            1200000,'2026-11-15'),
-
-        /* ── REVISIÓN PMO (10) ─────────────────────────────────────────────── */
-        req(11,'Sistema de Gestión de Colaterales',PEND,PMO,'2026-04-10','riesgos','alta','integracion',
-            'Las garantías asociadas a la cartera de crédito se registran en tres sistemas distintos sin conciliación automática, generando diferencias contables que deben resolverse manualmente cada mes.',
-            'Unificación del inventario de garantías en tiempo real, reducción del 90% en diferencias contables y visibilidad completa del LTV de la cartera para la gerencia de riesgos.',
-            890000,'2026-08-01',
-            [c(S,'2026-04-10','Solicitud enviada a revisión de la PMO. Se adjunta análisis de impacto en el portafolio de crédito.')]),
-        req(12,'Automatización de Reportes a la SFC',PEND,PMO,'2026-04-08','finanzas','alta','desarrollo',
-            'La generación de los 18 reportes periódicos exigidos por la SFC demanda 340 horas-analista mensuales, con riesgo de errores humanos en la consolidación de cifras.',
-            'Reducción a 12 horas-analista por mes, cero errores de transcripción y entrega automática en los formatos XML exigidos por el regulador.',
-            1400000,'2026-07-15',
-            [c(S,'2026-04-08','Adjunto el inventario completo de reportes regulatorios y sus plazos de entrega.')]),
-        req(13,'Plataforma Customer 360',PEND,PMO,'2026-04-06','marketing','media','analitica',
-            'El banco tiene siete fuentes de datos de clientes sin integrar: core, CRM, app móvil, call center, sucursales, tarjetas y banca electrónica, impidiendo una visión unificada del cliente.',
-            'Vista única del cliente en tiempo real, incremento del 28% en la efectividad de campañas de cross-sell y reducción del churn en un 15% mediante acciones preventivas.',
-            1100000,'2026-09-01',
-            [c(A,'2026-04-07','La PMO ha recibido la solicitud. Se agenda revisión con el comité de arquitectura de datos para la semana entrante.')]),
-        req(14,'Renovación Infraestructura de Red LAN/WAN',PEND,PMO,'2026-04-05','ti','alta','infraestructura',
-            'La infraestructura de red de 65 sucursales opera con equipos Cisco con más de 9 años de antigüedad, sin soporte de fabricante, con un uptime promedio del 91% vs. el SLA del 99.5%.',
-            'Uptime del 99.8%, habilitación de SD-WAN para gestión centralizada, reducción del 35% en costos de MPLS y soporte para aplicaciones en tiempo real en todas las sucursales.',
-            2700000,'2026-06-01',
-            [c(S,'2026-04-05','Se adjunta inventario completo de equipos de red con fechas de fin de vida y análisis de criticidad.')]),
-        req(15,'Onboarding Digital Persona Natural',PEND,PMO,'2026-04-03','marketing','baja','transformacion',
-            'La apertura de productos para personas naturales requiere presencia física con un tiempo promedio de 45 minutos, frente a un estándar de industria de 8 minutos en digital.',
-            'Reducción del tiempo de apertura de cuentas a 7 minutos, incremento de la conversión de prospectos digitales del 18% al 42% y habilitación de 24x7 sin fricción presencial.',
-            560000,'2026-10-01',
-            [c(A,'2026-04-04','Solicitud en revisión. La PMO evaluará el cumplimiento de la Circular 029 de la SFC para vinculación digital.')]),
-        req(16,'Gestión de Riesgo Operacional (ORM)',PEND,PMO,'2026-04-01','riesgos','media','analitica',
-            'Los eventos de riesgo operacional se registran en planillas Excel con frecuencia mensual, sin alertas tempranas ni seguimiento de controles, incumpliendo los estándares de Basilea III.',
-            'Registro en tiempo real de eventos de riesgo, dashboards para el comité de riesgos y reducción del capital regulatorio requerido por mejor gestión de pérdidas operativas.',
-            780000,'2026-08-15',
-            [c(S,'2026-04-01','Se incluye matriz de riesgos operacionales actual y mapeo con los requerimientos de Basilea III.')]),
-        req(17,'Automatización Mesa de Servicio TI',PEND,PMO,'2026-03-30','ti','baja','desarrollo',
-            'El service desk recibe 4.200 tickets mensuales con un FCR del 38% y MTTR de 6.4 horas, por debajo del benchmark de la industria bancaria (FCR 65%, MTTR 2.1 horas).',
-            'Incrementar el FCR al 68% mediante IA de clasificación y solución automática, reducir el MTTR a 2.3 horas y liberar 2 FTE para proyectos de mayor complejidad.',
-            240000,'2026-07-01',
-            [c(A,'2026-03-31','Solicitud recibida. El equipo de PMO verificará la integración con el ITSM existente antes de aprobar.')]),
-        req(18,'Nómina en la Nube (HR Cloud)',PEND,PMO,'2026-03-28','recursos_humanos','media','integracion',
-            'El sistema de nómina on-premise requiere 18 días de procesamiento mensual, es incapaz de liquidar componentes variables en tiempo real y no está integrado con el módulo de ausencias.',
-            'Cierre de nómina en 3 días, integración con el sistema de control de tiempo, liquidación de comisiones en tiempo real y reducción del error de nómina del 2.8% al 0.1%.',
-            920000,'2026-09-15',
-            [c(S,'2026-03-28','Adjunto comparativo de proveedores cloud HR y análisis de impacto en la integración con el core financiero.')]),
-        req(19,'Plataforma de Factoring Electrónico',PEND,PMO,'2026-03-26','finanzas','alta','desarrollo',
-            'La operación de factoring se gestiona con formularios físicos y confirmación manual, con tiempos de desembolso de 5 días vs. el estándar del mercado de 4 horas.',
-            'Reducción del tiempo de desembolso a 4 horas, procesamiento de 3.000 facturas diarias sin intervención manual y apertura del producto a 800 nuevas empresas proveedoras.',
-            1650000,'2026-08-01',
-            [c(A,'2026-03-27','La PMO confirma recepción. Se requerirá concepto jurídico sobre el marco regulatorio del factoring electrónico.')]),
-        req(20,'Modernización Banca Corresponsal',PEND,PMO,'2026-03-24','operaciones','alta','transformacion',
-            'La red de corresponsales no tiene visibilidad en tiempo real de transacciones, con conciliaciones T+2 que generan diferencias y reclamos que toman hasta 15 días hábiles en resolverse.',
-            'Conciliación en tiempo real con los 1.200 corresponsales, reducción del 85% en diferencias y reclamos, y habilitación de nuevos servicios como recargas y pagos de impuestos.',
-            3400000,'2026-07-15',
-            [c(S,'2026-03-24','Solicitud ingresada. Incluye mapa de la red de corresponsales y análisis de impacto en el flujo de caja operativo.')]),
-
-        /* ── EVALUACIÓN FINANCIERA (10) ────────────────────────────────────── */
-        req(21,'Motor de Precios en Tiempo Real',PEND,TEC,'2026-03-10','finanzas','alta','analitica',
-            'La fijación de tasas para créditos de consumo se actualiza manualmente cada semana, perdiendo competitividad ante fintechs que ajustan precios en tiempo real según el perfil del cliente.',
-            'Personalización de tasas en tiempo real para 1.2M de clientes activos, incremento de la tasa de aprobación en un 18% y reducción de la prima de riesgo promedio en 40 puntos básicos.',
-            2300000,'2026-08-01',
-            [c(S,'2026-03-10','Solicitud enviada. Adjunto benchmark de capacidades de pricing dinámico en el sector bancario latinoamericano.'),
-             c(A,'2026-03-15','Revisión PMO aprobada. Proyecto de alto impacto estratégico. Pasa a evaluación financiera para validar ROI y modelo de costo.')]),
-        req(22,'Sistema AML v3.0 con ML',PEND,TEC,'2026-03-08','riesgos','alta','seguridad',
-            'El sistema antilavado actual genera 2.400 alertas diarias con una tasa de falso positivo del 91%, consumiendo el 80% de la capacidad del equipo de cumplimiento en revisiones infructuosas.',
-            'Reducción de alertas a 300 diarias con falso positivo del 35%, liberación de 12 analistas de cumplimiento para casos complejos y mejora en la detección de tipologías emergentes.',
-            3100000,'2026-07-01',
-            [c(S,'2026-03-08','Adjunto análisis de capacidades del sistema actual y benchmarks de soluciones de ML para AML en la región.'),
-             c(A,'2026-03-12','PMO aprueba la iniciativa por urgencia regulatoria y riesgo reputacional. Evaluación financiera iniciada.')]),
-        req(23,'Plataforma Leasing Digital',PEND,TEC,'2026-03-06','operaciones','media','desarrollo',
-            'El proceso de arrendamiento financiero requiere 12 días desde la solicitud hasta el desembolso, con 9 puntos de intervención manual que generan errores y retrasos frecuentes.',
-            'Reducción del ciclo de leasing de 12 a 3 días, habilitación del autoservicio para renovaciones y cierre anticipado, y expansión de la cartera de leasing en un 40%.',
-            1050000,'2026-09-01',
-            [c(A,'2026-03-07','Revisión PMO completada. Proyecto alineado con el plan de expansión de productos de tesorería corporativa.'),
-             c(S,'2026-03-10','Adjunto análisis de competidores y propuesta técnica de la solución.')]),
-        req(24,'Kubernetes Enterprise para Microservicios',PEND,TEC,'2026-03-05','ti','alta','infraestructura',
-            'Las aplicaciones críticas se despliegan en servidores físicos con ciclos de release de 6 semanas y sin capacidad de escalado automático, impidiendo responder a picos de demanda.',
-            'Reducción del ciclo de release a 2 días, escalado automático para soportar picos de hasta 10x la demanda promedio y reducción del 40% en costos de infraestructura.',
-            1800000,'2026-07-15',
-            [c(S,'2026-03-05','Adjunto roadmap técnico de adopción de contenedores y análisis de madurez DevOps del equipo de TI.'),
-             c(A,'2026-03-10','PMO da visto bueno. El proyecto es habilitador de la estrategia de modernización tecnológica. Pasa a análisis financiero.')]),
-        req(25,'Sistema Integral de Sucursales',PEND,TEC,'2026-03-03','operaciones','media','integracion',
-            'Los 65 gestores de sucursal operan con cuatro aplicaciones diferentes sin integración, generando doble digitación y un tiempo de atención promedio de 18 minutos por transacción.',
-            'Reducción del tiempo de atención a 7 minutos, experiencia unificada en la aplicación del gestor y capacidad de atención de 95 clientes/día por sucursal vs. los 52 actuales.',
-            1300000,'2026-08-15',
-            [c(A,'2026-03-04','PMO aprobó la iniciativa. El proyecto responde a la estrategia de eficiencia operativa en red de distribución.'),
-             c(A,'2026-03-12','Evaluación financiera en proceso. Se solicita al solicitante un análisis detallado del costo de implementación por sucursal.')]),
-        req(26,'Reskilling en Transformación Digital',PEND,TEC,'2026-03-01','recursos_humanos','baja','transformacion',
-            'Solo el 23% del personal de la organización tiene competencias digitales básicas. La brecha aumenta con la aceleración tecnológica y pone en riesgo la adopción de nuevas plataformas.',
-            'Certificación del 70% del personal en competencias digitales en 18 meses, incremento del 45% en la tasa de adopción de nuevas herramientas y reducción de la resistencia al cambio.',
-            280000,'2026-09-01',
-            [c(S,'2026-03-01','Solicitud acompañada del diagnóstico de brechas digitales por área y la propuesta de contenidos con proveedores especializados.'),
-             c(A,'2026-03-05','PMO aprueba. Proyecto habilitador clave para la transformación digital organizacional. Evaluación financiera iniciada.')]),
-        req(27,'Módulo de Divisas y FX en Línea',PEND,TEC,'2026-02-28','operaciones','media','desarrollo',
-            'Las operaciones de cambio de divisas se procesan con un diferimiento de 15 minutos respecto al mercado, generando pérdidas por diferencial y riesgo de spread adverso en operaciones grandes.',
-            'Operación FX en tiempo real con tasa interbancaria, reducción de la exposición cambiaria y habilitación del autoservicio de divisas para clientes empresariales vía banca electrónica.',
-            950000,'2026-07-01',
-            [c(A,'2026-02-28','PMO aprueba el proyecto por su impacto en el negocio de tesorería corporativa. Pasa a revisión financiera.'),
-             c(S,'2026-03-03','Se adjunta análisis del impacto en el margen de intermediación y modelo de precios para el autoservicio de divisas.')]),
-        req(28,'Analítica Predictiva de Abandono de Clientes',PEND,TEC,'2026-02-26','marketing','alta','analitica',
-            'El banco pierde 4.800 clientes al mes por abandono sin detectar señales de churn con suficiente anticipación para activar campañas de retención efectivas.',
-            'Predicción de churn con 21 días de anticipación, reducción de la tasa de abandono del 1.8% al 0.9% mensual y ahorro de $12M anuales en costos de reactivación.',
-            740000,'2026-06-15',
-            [c(S,'2026-02-26','Solicitud presentada con modelo conceptual de variables predictoras y benchmarks de efectividad en el sector financiero.'),
-             c(A,'2026-03-01','PMO aprueba el proyecto por su alto impacto en la rentabilidad del portafolio de clientes activos. Evaluación financiera en curso.')]),
-        req(29,'Compliance FATCA/CRS Automatizado',PEND,TEC,'2026-02-24','riesgos','alta','seguridad',
-            'El proceso de reporte FATCA y CRS requiere 280 horas-analista anuales y utiliza exportaciones manuales de datos, con riesgo de errores e incumplimientos con la autoridad tributaria.',
-            'Automatización del 100% del proceso de reporte, reducción a 8 horas-analista anuales y eliminación del riesgo de sanciones fiscales internacionales.',
-            1550000,'2026-07-15',
-            [c(A,'2026-02-25','PMO aprueba por urgencia regulatoria. El incumplimiento FATCA/CRS conlleva sanciones del IRS y pérdida de acceso a mercados internacionales.'),
-             c(S,'2026-02-28','Se adjunta análisis técnico del gap entre los requerimientos actuales y la solución propuesta.')]),
-        req(30,'Facturación Electrónica Integrada con Core',PEND,TEC,'2026-02-22','finanzas','media','integracion',
-            'La generación de facturas electrónicas para los 42.000 clientes de banca empresarial no está integrada con el core bancario, requiriendo doble digitación y generando inconsistencias.',
-            'Eliminación de la doble digitación, generación automática de 95.000 facturas mensuales integradas con el core y reducción del 99% en facturas con errores.',
-            680000,'2026-08-01',
-            [c(S,'2026-02-22','Solicitud enviada. Adjunto mapa de integraciones requeridas entre el sistema de facturación y los módulos del core bancario.'),
-             c(A,'2026-02-26','PMO aprueba. El proyecto cumple con la normativa de facturación electrónica DIAN 2026. Pasa a evaluación de costos.')]),
-
-        /* ── APROBACIÓN / DIRECTOR (10) ────────────────────────────────────── */
-        req(31,'Cloud Híbrida Corporativa',PEND,DIR,'2026-01-15','ti','alta','infraestructura',
-            'El 85% de las cargas de trabajo críticas corren on-premise, con una capacidad de cómputo que se proyecta al 95% de utilización en Q3 2026, sin posibilidad de escalar sin inversión en hierro.',
-            'Migración del 60% de cargas no críticas a nube pública, reducción del 35% en CAPEX de infraestructura y habilitación de escalado elástico en horas para picos de demanda.',
-            5200000,'2026-06-01',
-            [c(S,'2026-01-15','Se adjunta arquitectura de referencia y análisis de TCO a 5 años vs. expansión on-premise.'),
-             c(A,'2026-01-20','Revisión PMO aprobada. Proyecto estratégico alineado con la hoja de ruta tecnológica 2026-2030.'),
-             c(A,'2026-02-10','Evaluación financiera completada. ROI de 28% en 3 años. TCO 35% inferior a la alternativa on-premise. Pasa a aprobación de dirección.')]),
-        req(32,'Sistema de Trading Algorítmico',PEND,DIR,'2026-01-12','finanzas','alta','analitica',
-            'La mesa de dinero ejecuta operaciones de renta fija y FX de forma manual, con latencias de decisión de 8 minutos que impiden aprovechar oportunidades de mercado de duración menor a 2 minutos.',
-            'Reducción de la latencia de decisión a 150ms, incremento del ingreso de la mesa de dinero en $4.8M anuales y reducción del riesgo de mercado por sistematización de stops.',
-            4100000,'2026-07-01',
-            [c(S,'2026-01-12','Adjunto modelo conceptual del sistema de trading y análisis de impacto regulatorio según Circular 041 de la SFC.'),
-             c(A,'2026-01-18','PMO aprueba. La iniciativa es clave para la competitividad de la tesorería corporativa.'),
-             c(A,'2026-02-15','Análisis financiero concluido. VPN positivo en $6.2M a 3 años. Pendiente aprobación del director de tesorería.')]),
-        req(33,'Pagos QR y Billetera Digital',PEND,DIR,'2026-01-10','operaciones','alta','desarrollo',
-            'El banco no cuenta con solución de pagos QR interoperables, perdiendo cuota de mercado frente a competidores que ya procesan el 28% de sus transacciones retail por este canal.',
-            'Captura del 18% de transacciones retail en QR al primer año, reducción del costo por transacción de $420 a $85 y habilitación de 2.1M de clientes en el ecosistema de pagos digitales.',
-            2800000,'2026-05-15',
-            [c(S,'2026-01-10','Propuesta técnica adjunta con arquitectura de interoperabilidad ACH Colombia y análisis de seguridad.'),
-             c(A,'2026-01-15','PMO aprueba por urgencia competitiva. El mercado de pagos QR crece al 140% anual en Colombia.'),
-             c(A,'2026-02-08','Evaluación financiera favorable. Payback a 22 meses. El comité financiero recomienda la aprobación.')]),
-        req(34,'Transformación Core de Riesgos',PEND,DIR,'2026-01-08','riesgos','alta','transformacion',
-            'El sistema de gestión de riesgos no está integrado con el core bancario en tiempo real, generando ventanas de exposición de hasta 4 horas en el cálculo de límites y concentraciones de crédito.',
-            'Cálculo de riesgo en tiempo real, cumplimiento total de Basilea IV, reducción del capital regulatorio en $45M por mejor asignación y prevención de sobrelímites en concentración.',
-            6500000,'2026-08-01',
-            [c(S,'2026-01-08','Solicitud acompañada del análisis de brechas Basilea IV y roadmap técnico de integración con el core.'),
-             c(A,'2026-01-14','PMO aprueba. La iniciativa responde a una exigencia regulatoria con plazo definido para 2027.'),
-             c(A,'2026-02-05','Evaluación financiera concluida. El costo del proyecto es inferior al capital regulatorio adicional que se evita.')]),
-        req(35,'Centro de Operaciones de Seguridad (SOC)',PEND,DIR,'2026-01-06','ti','alta','seguridad',
-            'El banco no tiene capacidad de detección y respuesta ante incidentes de ciberseguridad en tiempo real. En 2025 se detectaron 3 incidentes mayores con tiempos de respuesta de 72 horas.',
-            'Detección de amenazas en menos de 15 minutos, reducción del MTTD de 72 horas a 12 minutos, cumplimiento de la Circular 007 de la SFC y protección de $380M en activos digitales.',
-            3700000,'2026-06-15',
-            [c(S,'2026-01-06','Propuesta técnica con modelo de operación SOC 24x7 y análisis de los 3 incidentes del año anterior.'),
-             c(A,'2026-01-12','PMO aprueba. La ciberseguridad es una prioridad regulatoria de máxima urgencia para la junta directiva.'),
-             c(A,'2026-02-03','Análisis financiero favorable. El costo de un incidente mayor excede 8 veces la inversión del SOC.')]),
-        req(36,'Sucursales Express Digitales',PEND,DIR,'2026-01-04','operaciones','media','transformacion',
-            'El modelo de sucursal actual tiene un costo operativo promedio de $48M anuales por punto, mientras que los modelos express del mercado operan al 35% de ese costo con igual satisfacción.',
-            'Conversión de 20 sucursales tradicionales a modelo express, ahorro de $520M anuales en OPEX, reducción del tiempo de atención en un 50% y habilitación del modelo híbrido.',
-            1900000,'2026-07-01',
-            [c(A,'2026-01-05','PMO aprueba la iniciativa. El rediseño de la red de distribución es parte del plan estratégico 2026-2028.'),
-             c(S,'2026-01-10','Adjunto análisis de 20 sucursales candidatas y propuesta de rediseño del modelo de servicio.'),
-             c(A,'2026-01-30','Evaluación financiera completada. Payback a 18 meses. Se recomienda iniciar con 5 sucursales piloto.')]),
-        req(37,'Crédito PYME 100% Digital',PEND,DIR,'2026-01-02','finanzas','alta','desarrollo',
-            'La banca PYME origina $1.200M mensuales en crédito con un proceso que tarda 18 días, mientras los competidores digitales lo hacen en 48 horas, generando pérdida de clientes.',
-            'Originar crédito PYME en 24 horas, incrementar la cartera PYME en un 32% al primer año y reducir el costo de originación de $280.000 a $45.000 por operación.',
-            2400000,'2026-05-01',
-            [c(S,'2026-01-02','Solicitud con análisis del mercado PYME, benchmarks de la competencia y modelo de decisión crediticia propuesto.'),
-             c(A,'2026-01-08','PMO aprueba. El segmento PYME es estratégico y el banco está perdiendo cuota ante fintechs especializadas.'),
-             c(A,'2026-01-28','Evaluación financiera concluida. Incremento en NIM del 0.18% por mayor volumen y margen en PYME. Se eleva a aprobación del director.')]),
-        req(38,'Change Management y Cultura Ágil',PEND,DIR,'2025-12-28','recursos_humanos','media','transformacion',
-            'El 68% de los proyectos tecnológicos fallan en su adopción por resistencia organizacional, generando pérdidas en las inversiones realizadas y desmotivación de los equipos de proyecto.',
-            'Reducción del índice de fracaso en adopción del 68% al 25%, incremento del engagement de empleados en proyectos de cambio y medición del ROI de change management por iniciativa.',
-            680000,'2026-06-01',
-            [c(A,'2025-12-29','PMO aprueba. El programa de gestión del cambio es un habilitador crítico para el portafolio de proyectos.'),
-             c(S,'2026-01-05','Adjunto propuesta metodológica y presupuesto desglosado por actividad.'),
-             c(A,'2026-01-25','Evaluación financiera favorable. El ROI se mide por reducción en fracasos de proyectos. Pasa a aprobación de dirección de RRHH.')]),
-        req(39,'Business Intelligence Ejecutivo (BI)',PEND,DIR,'2025-12-26','finanzas','media','analitica',
-            'La alta dirección recibe reportes de gestión con 3 días de rezago y en formato PDF estático, imposibilitando el análisis ad hoc y la toma de decisiones basada en datos en tiempo real.',
-            'Dashboards ejecutivos en tiempo real, reducción del tiempo de preparación de comités de junta de 40 a 4 horas-analista y habilitación de análisis de escenarios en autoservicio.',
-            1150000,'2026-07-01',
-            [c(S,'2025-12-26','Propuesta técnica con inventario de indicadores clave por área de negocio y mockups de los dashboards ejecutivos.'),
-             c(A,'2025-12-30','PMO aprueba. El proyecto responde a una solicitud directa de la junta directiva.'),
-             c(A,'2026-01-20','Evaluación financiera completada. El costo es justificado por la mejora en la velocidad de decisión ejecutiva.')]),
-        req(40,'Expansión Datacenter Región Norte',PEND,DIR,'2025-12-24','ti','alta','infraestructura',
-            'La capacidad de cómputo en la región norte del país depende de la conectividad WAN al datacenter central, generando latencias de 280ms en operaciones críticas y riesgo de corte total.',
-            'Latencia reducida a 8ms en la región norte, disponibilidad del 99.99% independiente de la conectividad WAN y soporte para el crecimiento del 45% proyectado en 3 años.',
-            8200000,'2026-09-01',
-            [c(S,'2025-12-24','Adjunto estudio de factibilidad técnica, análisis de proveedores y proyecciones de capacidad a 5 años.'),
-             c(A,'2025-12-30','PMO aprueba. La expansión es crítica para la estrategia de regionalización del banco.'),
-             c(A,'2026-01-22','Análisis financiero: TCO inferior en 28% a la alternativa de expansión del datacenter central. Listo para aprobación final.')]),
-
-        /* ── APROBADAS (10) — con datos de implementación por etapa ─────────── */
-
-        /* ── 1. INICIACIÓN ────────────────────────────────────── req 41 ── */
-        req(41,'Migración Core Bancario a Temenos T24',APPR,DIR,'2025-08-10','ti','alta','transformacion',
-            'El core bancario tiene 24 años de antigüedad, funciona en COBOL sobre mainframe con costos de mantenimiento crecientes al 18% anual y no soporta la oferta de productos digitales requerida.',
-            'Plataforma bancaria moderna con API-first, reducción del 45% en costos de mantenimiento, time-to-market de nuevos productos de 6 meses a 3 semanas y base para Open Finance.',
-            12500000,'2025-11-01',
-            [c(S,'2025-08-10','Solicitud con análisis de 4 proveedores de core bancario, benchmarks de implementaciones en la región y análisis de riesgo.'),
-             c(A,'2025-08-18','PMO aprueba. Proyecto de máxima prioridad estratégica. Alineado con el Plan de Transformación Digital 2025-2030.'),
-             c(A,'2025-09-15','Evaluación financiera concluida. VPN de $28M a 7 años. El costo de no hacer supera 2x la inversión en 3 años.'),
-             c(A,'2025-10-05','Junta Directiva aprueba el proyecto por unanimidad. El comité de transformación hará seguimiento mensual.')],
-            mkImpl('iniciacion','2026-02-01',{
-                iniciacion:[
-                    d('acta_constitucion','Acta_Constitucion_CoreBancario_v1.0.pdf','pdf','2026-02-03'),
-                    d('stakeholders','Registro_Stakeholders_CoreBancario.xlsx','excel','2026-02-05'),
-                    d('plan_comunicacion','Plan_Comunicacion_Proyecto_Core.docx','word','2026-02-07'),
-                    d('acta_kickoff','Acta_KickOff_CoreBancario_2026-02-10.pdf','pdf','2026-02-10')
-                ]
-            },[
-                pm('2026-02-03','Proyecto iniciado formalmente. Acta de constitución firmada por el CEO y el CIO. Equipo base conformado: 3 PM, 2 arquitectos, 1 PMO.'),
-                pm('2026-02-10','Kick-off realizado con asistencia de 45 personas. Stakeholders mapeados en 4 niveles de influencia/interés. Cronograma master presentado.')
-            ],[
-                {stage:'iniciacion',movedAt:'2026-02-01',movedBy:'pm@banco.com'}
-            ])),
-
-        /* ── 2. ANÁLISIS Y DISEÑO ─────────────────────── req 42 y 43 ──── */
-        req(42,'Plataforma ML Antifraude en Tiempo Real',APPR,DIR,'2025-09-05','riesgos','alta','seguridad',
-            'El sistema de detección de fraude procesa transacciones con latencia de 3 segundos y detecta solo el 61% de los eventos fraudulentos, con pérdidas de $18M anuales.',
-            'Detección del 94% de fraudes en menos de 80ms, reducción de pérdidas por fraude de $18M a $2.8M anuales y disminución de la tasa de falsos positivos del 38% al 8%.',
-            4800000,'2025-12-01',
-            [c(S,'2025-09-05','Solicitud con análisis de pérdidas actuales, modelo conceptual de ML y evaluación de tres proveedores especializados.'),
-             c(A,'2025-09-12','PMO aprueba. La reducción de pérdidas por fraude es prioritaria para el comité de riesgos.'),
-             c(A,'2025-10-08','Análisis financiero: payback en 8 meses por ahorro en pérdidas. La junta aprobó la inversión sin objeciones.'),
-             c(A,'2025-11-02','Proyecto aprobado y en ejecución. Fase 1 (modelos de scoring) completada. Fase 2 (integración tiempo real) en curso.')],
-            mkImpl('analisis','2025-12-10',{
-                iniciacion:[
-                    d('acta_constitucion','Acta_Constitucion_MLAntifraude.pdf','pdf','2025-12-12'),
-                    d('stakeholders','Stakeholders_MLAntifraude_v1.xlsx','excel','2025-12-13'),
-                    d('plan_comunicacion','Plan_Comunicacion_Antifraude.docx','word','2025-12-15'),
-                    d('acta_kickoff','Acta_KickOff_Antifraude.pdf','pdf','2025-12-18')
-                ],
-                analisis:[
-                    d('brd_frd','BRD_MLAntifraude_v2.0.docx','word','2026-01-10'),
-                    d('arquitectura','Arquitectura_ML_Pipeline_v1.3.pdf','pdf','2026-01-15'),
-                    d('plan_proyecto','Cronograma_MLAntifraude_MS-Project.xlsx','excel','2026-01-18'),
-                    d('matriz_riesgos','Matriz_Riesgos_Tecnica_Antifraude.xlsx','excel','2026-01-20')
-                ]
-            },[
-                pm('2025-12-12','Iniciación completada en 8 días. Aprobación del PMO para avanzar a Análisis.'),
-                pm('2026-01-10','BRD finalizado con 312 requerimientos funcionales y 48 no funcionales. Revisado por el equipo de riesgos.'),
-                pm('2026-01-20','Arquitectura de referencia aprobada por el arquitecto empresarial. Pendiente plan de proyecto detallado con sprints.')
-            ],[
-                {stage:'iniciacion',movedAt:'2025-12-10',movedBy:'pm@banco.com'},
-                {stage:'analisis',  movedAt:'2026-01-08',movedBy:'pm@banco.com'}
-            ])),
-
-        req(43,'Portal Corporativo de Inversiones',APPR,DIR,'2025-10-01','finanzas','alta','desarrollo',
-            'Los clientes institucionales gestionan sus inversiones en renta fija y FX a través de llamadas telefónicas y correos, sin visibilidad en tiempo real de sus portafolios.',
-            'Autoservicio de inversiones para 380 clientes institucionales, incremento del AUM en $850M en el primer año y reducción del 60% en operaciones manuales de la mesa de dinero.',
-            2100000,'2026-01-15',
-            [c(S,'2025-10-01','Propuesta con benchmarks de portales de inversión corporativa y análisis de la demanda de los principales 50 clientes institucionales.'),
-             c(A,'2025-10-08','PMO aprueba. El portal es un diferenciador competitivo clave en banca corporativa.'),
-             c(A,'2025-11-05','Evaluación financiera favorable. El incremento de AUM justifica la inversión en 14 meses.'),
-             c(A,'2025-12-01','Aprobado por la dirección de banca corporativa y finanzas. Desarrollo iniciado.')],
-            mkImpl('analisis','2026-01-15',{
-                iniciacion:[
-                    d('acta_constitucion','Acta_Constitucion_PortalInversiones.pdf','pdf','2026-01-17'),
-                    d('stakeholders','Registro_Stakeholders_Portal.xlsx','excel','2026-01-18'),
-                    d('acta_kickoff','Acta_KickOff_PortalInversiones.pdf','pdf','2026-01-22')
-                ],
-                analisis:[
-                    d('brd_frd','FRD_PortalInversiones_v1.1.docx','word','2026-02-05'),
-                    d('arquitectura','Arquitectura_Portal_Investment_v1.0.pdf','pdf','2026-02-10')
-                ]
-            },[
-                pm('2026-01-22','Kick-off exitoso. 14 stakeholders identificados en banca corporativa y mesa de dinero.'),
-                pm('2026-02-10','Arquitectura aprobada. Usaremos microservicios con API Gateway. Pendiente el cronograma detallado con el proveedor seleccionado.')
-            ],[
-                {stage:'iniciacion',movedAt:'2026-01-15',movedBy:'pm@banco.com'},
-                {stage:'analisis',  movedAt:'2026-02-03',movedBy:'pm@banco.com'}
-            ])),
-
-        /* ── 3. CONSTRUCCIÓN ──────────────────────────── req 44 y 45 ──── */
-        req(44,'Datacenter Tier IV Región Andina',APPR,DIR,'2025-07-15','ti','alta','infraestructura',
-            'El banco no cuenta con infraestructura de procesamiento que garantice la continuidad ante desastres naturales o fallas de suministro eléctrico en la región andina donde opera el 70% del negocio.',
-            'Disponibilidad del 99.999% (Tier IV), tiempo de conmutación menor a 30 segundos, certificación Uptime Institute y cumplimiento de la Circular de Continuidad Operacional.',
-            9300000,'2026-02-01',
-            [c(S,'2025-07-15','Adjunto estudio de factibilidad, análisis de 3 ubicaciones candidatas y análisis sísmico de la región.'),
-             c(A,'2025-07-22','PMO aprueba. La continuidad operacional es una prioridad regulatoria de primer nivel.'),
-             c(A,'2025-08-20','Evaluación financiera concluida. El costo de una interrupción mayor supera 4x la inversión en infraestructura.'),
-             c(A,'2025-09-10','Junta Directiva aprueba la inversión. Proceso de licitación abierto con 5 constructores certificados Tier IV.')],
-            mkImpl('construccion','2025-10-01',{
-                iniciacion:[
-                    d('acta_constitucion','Acta_Constitucion_DatacenterTierIV.pdf','pdf','2025-10-03'),
-                    d('stakeholders','Stakeholders_Datacenter_v1.xlsx','excel','2025-10-05'),
-                    d('plan_comunicacion','Plan_Comunicacion_Datacenter.docx','word','2025-10-07'),
-                    d('acta_kickoff','Acta_KickOff_Datacenter_Oct2025.pdf','pdf','2025-10-10')
-                ],
-                analisis:[
-                    d('brd_frd','Especificaciones_TecnicasDatacenter_v3.0.pdf','pdf','2025-11-05'),
-                    d('arquitectura','Arquitectura_Datacenter_TierIV_v2.1.pdf','pdf','2025-11-12'),
-                    d('plan_proyecto','Cronograma_Datacenter_24meses.xlsx','excel','2025-11-18'),
-                    d('matriz_riesgos','Análisis_Riesgos_Datacenter_v1.pdf','pdf','2025-11-22'),
-                    d('aprobacion_diseno','Acta_Aprobacion_Diseño_Datacenter.pdf','pdf','2025-12-01')
-                ],
-                construccion:[
-                    d('informe_avance','Informe_Avance_Datacenter_Feb2026.pdf','pdf','2026-02-15'),
-                    d('actas_seguimiento','Actas_Comite_Seguimiento_Datacenter.pdf','pdf','2026-03-01')
-                ]
-            },[
-                pm('2025-10-10','Proyecto iniciado. Terreno seleccionado en zona franca de Bogotá. Contrato firmado con Turner Construction.'),
-                pm('2025-12-01','Diseño arquitectónico y estructural aprobado por Uptime Institute. Inicio de obras civiles el 15-ene-2026.'),
-                pm('2026-02-15','Obras civiles al 42%. Estructura metálica completada. Instalaciones eléctricas de alta tensión en progreso. Sin desviaciones de cronograma.')
-            ],[
-                {stage:'iniciacion',  movedAt:'2025-10-01',movedBy:'pm@banco.com'},
-                {stage:'analisis',    movedAt:'2025-11-03',movedBy:'pm@banco.com'},
-                {stage:'construccion',movedAt:'2026-01-20',movedBy:'pm@banco.com'}
-            ])),
-
-        req(45,'Omnicanalidad de Atención al Cliente',APPR,DIR,'2025-10-20','marketing','alta','transformacion',
-            'Los 5 canales de atención operan en silos con experiencias inconsistentes, sin contexto compartido del cliente. El 43% de los clientes reporta haber repetido información al pasar de canal.',
-            'Visión 360 del cliente en todos los canales, reducción del CSAT de 62 a 84 puntos, disminución del AHT en un 38% y eliminación de la necesidad de repetir información al cambiar de canal.',
-            3600000,'2026-01-15',
-            [c(S,'2025-10-20','Solicitud con customer journey map actual, análisis de pain points y propuesta de arquitectura omnicanal.'),
-             c(A,'2025-10-27','PMO aprueba. La experiencia del cliente es el eje central de la estrategia comercial 2026-2028.'),
-             c(A,'2025-11-25','Evaluación financiera favorable. El incremento en retención de clientes genera $6.2M anuales adicionales.'),
-             c(A,'2025-12-15','Director Comercial aprueba. Proyecto en ejecución con Accenture como integrador principal.')],
-            mkImpl('construccion','2026-01-05',{
-                iniciacion:[
-                    d('acta_constitucion','Acta_Constitucion_Omnicanalidad.pdf','pdf','2026-01-07'),
-                    d('stakeholders','Stakeholders_Omnicanalidad.xlsx','excel','2026-01-08'),
-                    d('plan_comunicacion','Plan_Comunicacion_Omnicanal.docx','word','2026-01-10'),
-                    d('acta_kickoff','Acta_KickOff_Omnicanalidad.pdf','pdf','2026-01-12')
-                ],
-                analisis:[
-                    d('brd_frd','BRD_Omnicanalidad_v2.docx','word','2026-01-28'),
-                    d('arquitectura','Arquitectura_Omnicanal_CustomerData.pdf','pdf','2026-02-02'),
-                    d('plan_proyecto','Cronograma_Omnicanalidad_Q2-2026.xlsx','excel','2026-02-05'),
-                    d('aprobacion_diseno','Acta_Aprobacion_Diseño_Omnicanal.pdf','pdf','2026-02-12')
-                ],
-                construccion:[
-                    d('informe_avance','Informe_Progreso_Sprint3_Omnicanalidad.pdf','pdf','2026-03-10'),
-                    d('doc_tecnica','Documentacion_Tecnica_APIs_Omnicanal_v1.pdf','pdf','2026-03-12')
-                ]
-            },[
-                pm('2026-01-12','Kick-off realizado. Accenture presentó el plan de trabajo. 4 sprints de 3 semanas para módulo de CDP (Customer Data Platform).'),
-                pm('2026-02-18','Análisis y diseño completados. Arquitectura de Customer Data Platform aprobada. Integración con Salesforce y Genesys definida.'),
-                pm('2026-03-10','Sprint 3 completado. CDP en integración con CRM. Canal de app móvil: 68% completado. Chat: 45%. Agente físico: 30%.')
-            ],[
-                {stage:'iniciacion',  movedAt:'2026-01-05',movedBy:'pm@banco.com'},
-                {stage:'analisis',    movedAt:'2026-01-26',movedBy:'pm@banco.com'},
-                {stage:'construccion',movedAt:'2026-02-16',movedBy:'pm@banco.com'}
-            ])),
-
-        /* ── 4. PRUEBAS ───────────────────────────────── req 46 y 47 ──── */
-        req(46,'Sistema de Tesorería Integrado (TMS)',APPR,DIR,'2025-11-05','finanzas','alta','analitica',
-            'La tesorería gestiona posiciones de liquidez en tiempo real con hojas de cálculo y actualizaciones manuales cada 2 horas, con riesgo de error en la gestión de límites de liquidez intradía.',
-            'Visibilidad en tiempo real de la posición de liquidez en 12 divisas, cumplimiento LCR/NSFR automatizado y reducción del riesgo de incumplimiento de límites del banco central.',
-            2850000,'2026-02-15',
-            [c(S,'2025-11-05','Propuesta técnica con análisis del proceso actual de tesorería y evaluación de los tres principales TMS del mercado.'),
-             c(A,'2025-11-12','PMO aprueba. La gestión de tesorería en tiempo real es un requerimiento regulatorio pendiente.'),
-             c(A,'2025-12-10','Evaluación financiera concluida. El ahorro en costos de oportunidad por liquidez mal gestionada supera el costo del TMS.'),
-             c(A,'2026-01-05','Aprobado por el director financiero y de tesorería. Implementación comenzó en febrero 2026.')],
-            mkImpl('pruebas','2026-02-15',{
-                iniciacion:[
-                    d('acta_constitucion','Acta_Constitucion_TMS.pdf','pdf','2026-02-17'),
-                    d('stakeholders','Stakeholders_TMS_Tesoreria.xlsx','excel','2026-02-18'),
-                    d('plan_comunicacion','Plan_Comunicacion_TMS.docx','word','2026-02-20'),
-                    d('acta_kickoff','Acta_KickOff_TMS.pdf','pdf','2026-02-22')
-                ],
-                analisis:[
-                    d('brd_frd','FRD_TMS_Murex_v1.5.docx','word','2026-03-05'),
-                    d('arquitectura','Arquitectura_Integracion_TMS_Core.pdf','pdf','2026-03-08'),
-                    d('plan_proyecto','Gantt_TMS_Implementacion.xlsx','excel','2026-03-10'),
-                    d('matriz_riesgos','Matriz_Riesgos_TMS.xlsx','excel','2026-03-12'),
-                    d('aprobacion_diseno','Acta_Aprobacion_Diseño_TMS.pdf','pdf','2026-03-18')
-                ],
-                construccion:[
-                    d('informe_avance','Informe_Construccion_TMS_Sem1.pdf','pdf','2026-04-01'),
-                    d('doc_tecnica','Manual_Configuracion_Murex_v2.pdf','pdf','2026-04-05'),
-                    d('actas_seguimiento','Actas_Seguimiento_Marzo_TMS.pdf','pdf','2026-04-08'),
-                    d('control_cambios','Control_Cambios_Alcance_TMS_v1.docx','word','2026-04-10')
-                ],
-                pruebas:[
-                    d('plan_pruebas','Plan_UAT_TMS_v2.0.pdf','pdf','2026-04-15'),
-                    d('reporte_pruebas','Reporte_Ejecucion_UAT_TMS_Ciclo1.xlsx','excel','2026-04-20'),
-                    d('reporte_defectos','Reporte_Defectos_TMS_Sprint5.xlsx','excel','2026-04-22')
-                ]
-            },[
-                pm('2026-02-22','Kick-off TMS realizado con equipo de tesorería y consultoría de Murex. 14 semanas de implementación planificadas.'),
-                pm('2026-03-18','Diseño de integración TMS-Core aprobado. 47 interfaces de datos mapeadas y documentadas.'),
-                pm('2026-04-01','Construcción completada al 100%. Todos los procesos de tesorería configurados en Murex. Iniciando UAT.'),
-                pm('2026-04-22','UAT Ciclo 1: 124 casos ejecutados, 108 exitosos (87%). 16 defectos encontrados, 12 resueltos. Ciclo 2 inicia el 25-abr.')
-            ],[
-                {stage:'iniciacion',  movedAt:'2026-02-15',movedBy:'pm@banco.com'},
-                {stage:'analisis',    movedAt:'2026-03-03',movedBy:'pm@banco.com'},
-                {stage:'construccion',movedAt:'2026-03-20',movedBy:'pm@banco.com'},
-                {stage:'pruebas',     movedAt:'2026-04-14',movedBy:'pm@banco.com'}
-            ])),
-
-        req(47,'RPA de Procesos Operativos Back Office',APPR,DIR,'2025-11-18','operaciones','media','integracion',
-            'El back office procesa manualmente 28 tipos de tareas repetitivas que consumen 2.400 horas-analista mensuales, con una tasa de error del 3.8% que genera reprocesos y reclamos.',
-            'Automatización de 28 procesos con RPA, liberación de 2.400 horas-analista para actividades de mayor valor y reducción de la tasa de error al 0.02%.',
-            1450000,'2026-03-01',
-            [c(S,'2025-11-18','Solicitud con inventario de 28 procesos candidatos, métricas de volumen y análisis de viabilidad de automatización.'),
-             c(A,'2025-11-24','PMO aprueba. El RPA tiene impacto inmediato en eficiencia operativa y es de bajo riesgo tecnológico.'),
-             c(A,'2025-12-20','Evaluación financiera: payback en 11 meses. ROI del 340% a 3 años.'),
-             c(A,'2026-01-10','Director de Operaciones aprueba. Implementación inició con los 5 procesos de mayor volumen.')],
-            mkImpl('pruebas','2026-01-15',{
-                iniciacion:[
-                    d('acta_constitucion','Acta_Constitucion_RPA_BackOffice.pdf','pdf','2026-01-17'),
-                    d('stakeholders','Stakeholders_RPA_v1.xlsx','excel','2026-01-18'),
-                    d('plan_comunicacion','Plan_Comunicacion_RPA.docx','word','2026-01-20'),
-                    d('acta_kickoff','Acta_KickOff_RPA.pdf','pdf','2026-01-22')
-                ],
-                analisis:[
-                    d('brd_frd','Inventario_28Procesos_RPA_v2.docx','word','2026-02-05'),
-                    d('arquitectura','Arquitectura_RPA_UiPath_v1.pdf','pdf','2026-02-10'),
-                    d('plan_proyecto','Cronograma_RPA_28Procesos.xlsx','excel','2026-02-12'),
-                    d('aprobacion_diseno','Acta_Aprobacion_Diseno_RPA.pdf','pdf','2026-02-20')
-                ],
-                construccion:[
-                    d('informe_avance','Informe_Avance_RPA_Fase1_14bots.pdf','pdf','2026-03-15'),
-                    d('doc_tecnica','Documentacion_Tecnica_Bots_RPA_v1.pdf','pdf','2026-03-20'),
-                    d('actas_seguimiento','Actas_Sprint_Review_RPA.pdf','pdf','2026-03-25')
-                ],
-                pruebas:[
-                    d('plan_pruebas','Plan_Pruebas_UAT_RPA_28Procesos.pdf','pdf','2026-04-01')
-                ]
-            },[
-                pm('2026-01-22','Kick-off con UiPath y equipo de operaciones. 28 procesos priorizados en 3 oleadas de automatización.'),
-                pm('2026-02-20','Análisis completado. Arquitectura UiPath Orchestrator aprobada. 14 bots en primera oleada.'),
-                pm('2026-03-25','Oleada 1 (14 bots) desplegada en ambiente QA. Tasa de error: 0.015%. Oleada 2 en construcción.'),
-                pm('2026-04-01','Plan de pruebas UAT registrado. Inicio de ejecución el 05-abr con 80 casos de prueba por proceso.')
-            ],[
-                {stage:'iniciacion',  movedAt:'2026-01-15',movedBy:'pm@banco.com'},
-                {stage:'analisis',    movedAt:'2026-02-03',movedBy:'pm@banco.com'},
-                {stage:'construccion',movedAt:'2026-02-22',movedBy:'pm@banco.com'},
-                {stage:'pruebas',     movedAt:'2026-03-28',movedBy:'pm@banco.com'}
-            ])),
-
-        /* ── 5. GO LIVE ───────────────────────────────── req 48 y 49 ──── */
-        req(48,'Plataforma Open Finance',APPR,DIR,'2025-09-20','ti','alta','transformacion',
-            'La regulación de Open Finance exige exponer datos de clientes (con su consentimiento) a terceros certificados antes de Q4 2026, bajo un esquema de APIs estandarizadas.',
-            'Cumplimiento regulatorio, posicionamiento como banco líder en Open Finance, generación de ingresos por APIs premium y habilitación de 45 socios fintech en el ecosistema.',
-            3200000,'2026-01-01',
-            [c(S,'2025-09-20','Propuesta técnica con arquitectura de APIs Open Finance y análisis del marco regulatorio de la Superintendencia Financiera.'),
-             c(A,'2025-09-27','PMO aprueba con máxima prioridad. El incumplimiento regulatorio implica sanciones de hasta $2.000M.'),
-             c(A,'2025-10-25','Evaluación financiera favorable. El modelo de monetización de APIs genera ingresos estimados de $1.8M anuales.'),
-             c(A,'2025-11-15','Junta Directiva aprueba de forma unánime. Proyecto catalogado como crítico para la continuidad del negocio.')],
-            mkImpl('go_live','2025-11-20',{
-                iniciacion:[
-                    d('acta_constitucion','Acta_Constitucion_OpenFinance.pdf','pdf','2025-11-22'),
-                    d('stakeholders','Stakeholders_OpenFinance.xlsx','excel','2025-11-24'),
-                    d('plan_comunicacion','Plan_Comunicacion_OpenFinance.docx','word','2025-11-25'),
-                    d('acta_kickoff','Acta_KickOff_OpenFinance.pdf','pdf','2025-11-28')
-                ],
-                analisis:[
-                    d('brd_frd','FRD_OpenFinance_APIs_v3.docx','word','2025-12-15'),
-                    d('arquitectura','Arquitectura_OpenFinance_APIGateway.pdf','pdf','2025-12-20'),
-                    d('plan_proyecto','Cronograma_OpenFinance_2025-2026.xlsx','excel','2025-12-22'),
-                    d('matriz_riesgos','Analisis_Riesgos_Regulatorio_OpenFinance.xlsx','excel','2025-12-28'),
-                    d('aprobacion_diseno','Acta_Aprobacion_Diseño_OpenFinance.pdf','pdf','2026-01-05')
-                ],
-                construccion:[
-                    d('informe_avance','Informe_Avance_OpenFinance_Enero2026.pdf','pdf','2026-01-31'),
-                    d('doc_tecnica','Documentacion_APIs_OpenFinance_Swagger.pdf','pdf','2026-02-05'),
-                    d('actas_seguimiento','Actas_Comite_Tecnico_OpenFinance.pdf','pdf','2026-02-15'),
-                    d('control_cambios','Control_Cambios_Alcance_OpenFinance.docx','word','2026-02-20')
-                ],
-                pruebas:[
-                    d('plan_pruebas','Plan_UAT_OpenFinance_v1.pdf','pdf','2026-03-01'),
-                    d('reporte_pruebas','Reporte_Ejecucion_UAT_OpenFinance.xlsx','excel','2026-03-15'),
-                    d('reporte_defectos','Reporte_Defectos_OpenFinance_Final.xlsx','excel','2026-03-28'),
-                    d('certificacion_uat','Acta_Certificacion_UAT_OpenFinance.pdf','pdf','2026-04-01')
-                ],
-                go_live:[
-                    d('checklist_produccion','Checklist_Pase_Produccion_OpenFinance.pdf','pdf','2026-04-08'),
-                    d('plan_despliegue','Plan_Despliegue_Rollback_OpenFinance.pdf','pdf','2026-04-10'),
-                    d('comunicacion_usuarios','Comunicacion_Fintech_Partners_OpenFinance.pdf','pdf','2026-04-12'),
-                    d('acta_produccion','Acta_Puesta_Produccion_OpenFinance.pdf','pdf','2026-04-15')
-                ]
-            },[
-                pm('2025-11-28','Proyecto iniciado con máxima prioridad regulatoria. Equipo de 18 personas. Deadline SFC: 30-sep-2026.'),
-                pm('2026-01-05','Diseño de las 32 APIs Open Finance aprobado por la Superintendencia Financiera en reunión de trabajo.'),
-                pm('2026-02-15','Construcción al 100%. 32 APIs desarrolladas, documentadas en Swagger y desplegadas en sandbox.'),
-                pm('2026-04-01','UAT completado. 0 defectos críticos pendientes. Certificación firmada por el Director de TI y el Oficial de Cumplimiento.'),
-                pm('2026-04-15','GO LIVE exitoso. Plataforma productiva. 12 fintechs conectadas en primera ola. Sin incidentes en las primeras 48 horas.')
-            ],[
-                {stage:'iniciacion',  movedAt:'2025-11-20',movedBy:'pm@banco.com'},
-                {stage:'analisis',    movedAt:'2025-12-12',movedBy:'pm@banco.com'},
-                {stage:'construccion',movedAt:'2026-01-08',movedBy:'pm@banco.com'},
-                {stage:'pruebas',     movedAt:'2026-02-28',movedBy:'pm@banco.com'},
-                {stage:'go_live',     movedAt:'2026-04-05',movedBy:'pm@banco.com'}
-            ])),
-
-        req(49,'SAP HCM Nómina Global',APPR,DIR,'2025-10-10','recursos_humanos','media','integracion',
-            'La nómina de 4.800 empleados en 3 países se gestiona con sistemas independientes sin integración, generando inconsistencias en los beneficios y 18 días de procesamiento mensual.',
-            'Nómina unificada en 3 países, cierre en 3 días, integración con SAP S/4HANA financiero y reducción del 94% en ajustes post-cierre por inconsistencias.',
-            1800000,'2026-02-01',
-            [c(S,'2025-10-10','Solicitud con análisis de los tres sistemas actuales, inventario de integraciones requeridas y propuesta de SAP HCM.'),
-             c(A,'2025-10-16','PMO aprueba. La unificación de nómina es un prerequisito para la migración a SAP S/4HANA financiero.'),
-             c(A,'2025-11-14','Evaluación financiera concluida. El ahorro en licencias y personal de soporte recupera la inversión en 26 meses.'),
-             c(A,'2025-12-08','Director de RRHH y CFO aprueban el proyecto. Implementación iniciada con Deloitte como integrador.')],
-            mkImpl('go_live','2025-12-10',{
-                iniciacion:[
-                    d('acta_constitucion','Acta_Constitucion_SAPHCM.pdf','pdf','2025-12-12'),
-                    d('stakeholders','Stakeholders_SAP_HCM.xlsx','excel','2025-12-13'),
-                    d('plan_comunicacion','Plan_Comunicacion_SAP_HCM.docx','word','2025-12-15'),
-                    d('acta_kickoff','Acta_KickOff_SAP_HCM_Nomina.pdf','pdf','2025-12-18')
-                ],
-                analisis:[
-                    d('brd_frd','BBP_SAP_HCM_Nomina_v2.docx','word','2026-01-10'),
-                    d('arquitectura','Arquitectura_Integracion_SAPHCM_S4HANA.pdf','pdf','2026-01-15'),
-                    d('plan_proyecto','Cronograma_SAP_HCM_20semanas.xlsx','excel','2026-01-18'),
-                    d('aprobacion_diseno','Acta_Aprobacion_Diseño_SAP_HCM.pdf','pdf','2026-01-25')
-                ],
-                construccion:[
-                    d('informe_avance','Informe_Configuracion_SAPHCM_Fase1.pdf','pdf','2026-02-20'),
-                    d('doc_tecnica','Documentacion_Tecnica_SAP_HCM_v1.pdf','pdf','2026-02-25'),
-                    d('actas_seguimiento','Actas_Steering_SAP_HCM_Feb2026.pdf','pdf','2026-03-01')
-                ],
-                pruebas:[
-                    d('plan_pruebas','Plan_UAT_Nomina_SAP_HCM.pdf','pdf','2026-03-05'),
-                    d('reporte_pruebas','Reporte_UAT_Nomina_Ciclo1y2.xlsx','excel','2026-03-20'),
-                    d('reporte_defectos','Defectos_UAT_SAPHCM_Resueltos.xlsx','excel','2026-03-28'),
-                    d('certificacion_uat','Certificacion_UAT_Nomina_Firmada.pdf','pdf','2026-04-02')
-                ],
-                go_live:[
-                    d('checklist_produccion','GoLive_Checklist_SAPHCM.xlsx','excel','2026-04-10'),
-                    d('plan_despliegue','Plan_Cutover_Nomina_SAP_HCM.pdf','pdf','2026-04-12')
-                ]
-            },[
-                pm('2025-12-18','Kick-off con Deloitte. Equipo de 22 personas. Metodología SAP Activate. 20 semanas de implementación.'),
-                pm('2026-01-25','BBP (Business Blueprint) firmado. 847 objetos de configuración mapeados. Diseño aprobado.'),
-                pm('2026-03-01','Configuración completada en 3 países. Migración de datos históricos: 96% exitosa. 4% requiere limpieza manual.'),
-                pm('2026-04-02','UAT superado con 0 defectos críticos. 2 mejoras menores gestionadas en backlog post-go-live. Cutover planificado para 25-abr.')
-            ],[
-                {stage:'iniciacion',  movedAt:'2025-12-10',movedBy:'pm@banco.com'},
-                {stage:'analisis',    movedAt:'2026-01-08',movedBy:'pm@banco.com'},
-                {stage:'construccion',movedAt:'2026-01-27',movedBy:'pm@banco.com'},
-                {stage:'pruebas',     movedAt:'2026-03-03',movedBy:'pm@banco.com'},
-                {stage:'go_live',     movedAt:'2026-04-07',movedBy:'pm@banco.com'}
-            ])),
-
-        /* ── 6. CIERRE ────────────────────────────────── req 50 ──────── */
-        req(50,'Transformación Ágil Organizacional',APPR,DIR,'2025-11-28','recursos_humanos','alta','transformacion',
-            'El 80% de los proyectos se gestionan con metodología en cascada con tiempos de entrega de 18 meses promedio. La alta dirección ha definido como objetivo estratégico la reducción a 4 meses.',
-            'Adopción de marcos ágiles (SAFe) en 12 tribus de producto, reducción del time-to-market de 18 a 4 meses, incremento del índice de satisfacción con proyectos del 34% al 78%.',
-            2200000,'2026-02-15',
-            [c(S,'2025-11-28','Propuesta con diagnóstico de madurez ágil, plan de adopción SAFe y análisis de las 12 organizaciones de producto candidatas.'),
-             c(A,'2025-12-03','PMO aprueba. La transformación ágil es el habilitador principal de la estrategia de velocidad de entrega.'),
-             c(A,'2025-12-28','Evaluación financiera: la reducción de time-to-market genera $8.4M adicionales anuales por aceleración de ingresos.'),
-             c(A,'2026-01-18','CEO aprueba personalmente el programa. La transformación ágil es el proyecto #1 de la agenda del comité ejecutivo.')],
-            mkImpl('cierre','2025-10-01',{
-                iniciacion:[
-                    d('acta_constitucion','Acta_Constitucion_TransformacionAgil.pdf','pdf','2025-10-03'),
-                    d('stakeholders','Stakeholders_SAFe_12Tribus.xlsx','excel','2025-10-05'),
-                    d('plan_comunicacion','Plan_Comunicacion_Agile_Transformation.docx','word','2025-10-07'),
-                    d('acta_kickoff','Acta_KickOff_TransformacionAgil.pdf','pdf','2025-10-10')
-                ],
-                analisis:[
-                    d('brd_frd','Diagnostico_Madurez_Agil_v2.docx','word','2025-11-05'),
-                    d('arquitectura','Roadmap_Adopcion_SAFe_Banco.pdf','pdf','2025-11-12'),
-                    d('plan_proyecto','Plan_Transformacion_Agil_18meses.xlsx','excel','2025-11-15'),
-                    d('matriz_riesgos','Analisis_Riesgos_Transformacion_Agil.xlsx','excel','2025-11-20'),
-                    d('aprobacion_diseno','Acta_Aprobacion_Roadmap_SAFe.pdf','pdf','2025-11-28')
-                ],
-                construccion:[
-                    d('informe_avance','Informe_Avance_PI1_SAFe_Enero2026.pdf','pdf','2026-01-31'),
-                    d('doc_tecnica','Guia_Implementacion_SAFe_Banco.pdf','pdf','2026-02-05'),
-                    d('actas_seguimiento','Actas_PI_Planning_Q1-2026.pdf','pdf','2026-02-10'),
-                    d('control_cambios','Control_Cambios_Alcance_Agile.docx','word','2026-02-15')
-                ],
-                pruebas:[
-                    d('plan_pruebas','Plan_Validacion_Adopcion_SAFe.pdf','pdf','2026-02-20'),
-                    d('reporte_pruebas','Reporte_Metricas_Velocidad_Tribus.xlsx','excel','2026-03-10'),
-                    d('reporte_defectos','Registro_Issues_Transformacion_Agil.xlsx','excel','2026-03-15'),
-                    d('certificacion_uat','Certificacion_Madurez_Agil_Tribus.pdf','pdf','2026-03-22')
-                ],
-                go_live:[
-                    d('checklist_produccion','Checklist_Operacion_SAFe_Productivo.pdf','pdf','2026-03-25'),
-                    d('plan_despliegue','Plan_Despliegue_Agile_AllTribes.pdf','pdf','2026-03-26'),
-                    d('comunicacion_usuarios','Comunicacion_Colaboradores_SAFe.pdf','pdf','2026-03-28'),
-                    d('acta_produccion','Acta_Activacion_SAFe_12Tribus.pdf','pdf','2026-04-01')
-                ],
-                cierre:[
-                    d('acta_cierre','Acta_Cierre_Transformacion_Agil.pdf','pdf','2026-04-15'),
-                    d('lecciones_aprendidas','Lecciones_Aprendidas_SAFe_Banco.docx','word','2026-04-16'),
-                    d('evaluacion_beneficios','Evaluacion_Beneficios_Agil_Q1-2026.xlsx','excel','2026-04-18'),
-                    d('transferencia_conocimiento','Guia_Operacion_SAFe_Centro_Excelencia.pdf','pdf','2026-04-19')
-                ]
-            },[
-                pm('2025-10-10','Programa iniciado. 3 Agile Release Trains (ARTs) formados con coaches certificados SAFe 6.0.'),
-                pm('2025-11-28','Análisis de madurez: nivel 1.8/5 promedio. 12 tribus identificadas. Roadmap de 18 meses aprobado por el CEO.'),
-                pm('2026-01-31','PI Planning #1 completado con 12 tribus. 184 features comprometidas para Q1. Velocidad base establecida.'),
-                pm('2026-03-22','Certificación de adopción SAFe completada. 11 de 12 tribus en nivel 3+. NPS de satisfacción: 72%.'),
-                pm('2026-04-01','Go Live: 12 tribus operando en cadencia SAFe. Time-to-market promedio reducido de 18 a 5.4 meses (-70%).'),
-                pm('2026-04-19','Proyecto cerrado formalmente. Beneficios realizados documentados. Centro de Excelencia Ágil operativo con 8 coaches internos.')
-            ],[
-                {stage:'iniciacion',  movedAt:'2025-10-01',movedBy:'pm@banco.com'},
-                {stage:'analisis',    movedAt:'2025-11-01',movedBy:'pm@banco.com'},
-                {stage:'construccion',movedAt:'2025-12-01',movedBy:'pm@banco.com'},
-                {stage:'pruebas',     movedAt:'2026-02-18',movedBy:'pm@banco.com'},
-                {stage:'go_live',     movedAt:'2026-03-23',movedBy:'pm@banco.com'},
-                {stage:'cierre',      movedAt:'2026-04-12',movedBy:'pm@banco.com'}
-            ]))
-        ];
-    })(),
+    requests: [],
     filters: {
         area: '',
         prioridad: '',
@@ -838,41 +177,117 @@ const AppState = {
     }
 };
 
+/** pmoData.js sincroniza con window.AppState (misma referencia que AppState). */
+if (typeof window !== 'undefined') {
+    window.AppState = AppState;
+}
+
 /* ------------------------------- Utilidades ----------------------------- */
 
-function loadState() {
-    const savedState = localStorage.getItem(STORAGE_KEY);
-    if (savedState) {
-        try {
-            const parsed = JSON.parse(savedState);
-            if (parsed.version !== STORAGE_VERSION) {
-                localStorage.removeItem(STORAGE_KEY);
-                return;
-            }
-            if (Array.isArray(parsed.requests)) {
-                AppState.requests = parsed.requests.map((req) => ({
-                    stage: STAGE.PMO,
-                    implementation: null,
-                    ...req
-                }));
-            }
-            if (parsed.currentUser) {
-                AppState.currentUser = parsed.currentUser;
-            }
-        } catch (error) {
-            console.warn('No se pudo cargar el estado persistido.', error);
-            localStorage.removeItem(STORAGE_KEY);
-        }
+async function refreshRequestsFromServer() {
+    try {
+        AppState.requests = await PMOData.fetchAllRequests();
+    } catch (error) {
+        console.error(error);
+        showNotification('No se pudieron cargar las solicitudes desde el servidor.', 'error');
     }
 }
 
-function saveState() {
-    const toSave = {
-        version: STORAGE_VERSION,
-        currentUser: AppState.currentUser,
-        requests: AppState.requests
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+async function persistRequestUpdate(req) {
+    try {
+        await PMOData.updateRequest(req);
+    } catch (error) {
+        console.error(error);
+        showNotification('Error al guardar: ' + (error.message || 'Desconocido'), 'error');
+        throw error;
+    }
+}
+
+async function addCommentToRequest(req, text, dateStr) {
+    const d = dateStr || new Date().toISOString().split('T')[0];
+    await PMOData.insertRequestComment(req.id, text, d);
+    if (!req.comments) {
+        req.comments = [];
+    }
+    req.comments.push({
+        author: AppState.currentUser.email,
+        date: d,
+        text: text
+    });
+}
+
+/** Nombre visible: nombre completo o parte local del correo. */
+function getUserDisplayName(user) {
+    if (!user) {
+        return 'Usuario';
+    }
+    const name = user.fullName && String(user.fullName).trim();
+    if (name) {
+        return name;
+    }
+    const email = user.email;
+    if (email && email.indexOf('@') !== -1) {
+        return email.split('@')[0];
+    }
+    return 'Usuario';
+}
+
+/** Hasta dos letras para el avatar circular. */
+function getUserInitials(displayName) {
+    const s = (displayName || 'U').trim();
+    if (!s) {
+        return 'U';
+    }
+    const parts = s.split(/\s+/).filter((p) => p.length > 0);
+    if (parts.length >= 2) {
+        return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+    return s.charAt(0).toUpperCase();
+}
+
+/** Acceso a Mi perfil: avatar con iniciales + nombre (barra lateral). */
+function createSidebarUserProfile(activeRoute) {
+    const user = AppState.currentUser;
+    const bar = document.createElement('button');
+    bar.type = 'button';
+    bar.className = 'user-profile-bar';
+    if (activeRoute === 'mi_perfil') {
+        bar.classList.add('user-profile-bar--active');
+    }
+    bar.setAttribute('aria-label', 'Abrir mi perfil');
+    const display = getUserDisplayName(user);
+    const initials = getUserInitials(display);
+
+    const avatar = document.createElement('div');
+    avatar.className = 'user-profile-bar__avatar';
+    avatar.setAttribute('aria-hidden', 'true');
+    const initSpan = document.createElement('span');
+    initSpan.className = 'user-profile-bar__initials';
+    initSpan.textContent = initials;
+    avatar.appendChild(initSpan);
+    bar.appendChild(avatar);
+
+    const textCol = document.createElement('div');
+    textCol.className = 'user-profile-bar__text';
+    const nameEl = document.createElement('span');
+    nameEl.className = 'user-profile-bar__name';
+    nameEl.textContent = display;
+    if (user && user.email) {
+        nameEl.title = user.email;
+    }
+    textCol.appendChild(nameEl);
+    const sub = document.createElement('span');
+    sub.className = 'user-profile-bar__sub';
+    sub.textContent = 'Mi perfil';
+    textCol.appendChild(sub);
+    bar.appendChild(textCol);
+
+    bar.addEventListener('click', (event) => {
+        event.preventDefault();
+        navigateTo('mi_perfil');
+    });
+
+    return bar;
 }
 
 function clearAppRoot() {
@@ -885,7 +300,8 @@ function clearAppRoot() {
 
 function formatRequestId(id) {
     const padded = String(id).padStart(3, '0');
-    return `REQ-2024-${padded}`;
+    const year = new Date().getFullYear();
+    return `REQ-${year}-${padded}`;
 }
 
 function formatCurrency(value) {
@@ -905,6 +321,27 @@ function formatDate(dateString) {
     const parts = dateString.split('-');
     if (parts.length !== 3) return dateString;
     return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
+
+/** Tamaño en bytes a texto legible (base 1024). */
+function formatBytes(numBytes) {
+    const n = Number(numBytes);
+    if (!Number.isFinite(n) || n < 0) {
+        return '—';
+    }
+    if (n < 1000) {
+        return String(Math.round(n)) + ' B';
+    }
+    const units = ['KB', 'MB', 'GB', 'TB'];
+    let v = n;
+    let i = 0;
+    const base = 1024;
+    while (v >= base && i < units.length - 1) {
+        v /= base;
+        i += 1;
+    }
+    const roundUp = (v % 1) < 0.05 || v >= 10;
+    return (roundUp ? Math.round(v) : v.toFixed(1)) + ' ' + units[i];
 }
 
 function getStatusBadgeClass(status) {
@@ -1069,6 +506,58 @@ function ensureNotificationsContainer() {
     return container;
 }
 
+/**
+ * Convierte errores de red de supabase-js en texto útil (es).
+ * "Failed to fetch" no es validación: indica que el navegador no pudo conectar.
+ */
+function formatAuthClientError(err) {
+    const msg = (err && err.message) ? String(err.message) : '';
+    const lower = msg.toLowerCase();
+    const code = err && err.code ? String(err.code) : '';
+    if (
+        code === 'over_email_send_rate_limit'
+        || lower.indexOf('email rate limit') !== -1
+        || (lower.indexOf('email') !== -1 && lower.indexOf('limit') !== -1 && lower.indexOf('exceed') !== -1)
+    ) {
+        return 'Límite de correos de autenticación alcanzado (política de Supabase: pocas notificaciones por hora con el servicio de correo integrado). Vuelva a intentar más tarde, reduzca las pruebas en desarrollo, o en Supabase: Authentication → Emails configure SMTP propio para límites mayores. Si acaba de enviar un enlace, espere 1 h o revise la bandeja: quizá el correo ya se envió.';
+    }
+    if (
+        lower.indexOf('failed to fetch') !== -1
+        || lower.indexOf('networkerror') !== -1
+        || lower === 'fetch failed'
+        || lower.indexOf('load failed') !== -1
+    ) {
+        return 'No se pudo conectar con el servidor. Abra la app por http://localhost (no use file://), compruebe la URL y la clave anónima en el archivo de config, y que el proyecto de Supabase esté activo.';
+    }
+    return msg || 'Error de autenticación.';
+}
+
+/**
+ * Aplica el perfil a AppState; si la cuenta está desactivada, cierra sesión.
+ * @returns {Promise<boolean>} true si la sesión puede continuar
+ */
+async function applyProfileAfterAuth(profile) {
+    if (!profile) {
+        return false;
+    }
+    if (profile.isActive === false) {
+        try {
+            await PMOSupabase.getSupabase().auth.signOut();
+        } catch (e) {
+            console.warn(e);
+        }
+        showNotification('Su cuenta está desactivada. Contacte al administrador de la PMO.', 'error');
+        return false;
+    }
+    AppState.currentUser = {
+        id: profile.id,
+        email: profile.email,
+        role: profile.appRole,
+        fullName: profile.fullName || ''
+    };
+    return true;
+}
+
 function showNotification(message, type) {
     const kind = type || 'info';
     const container = ensureNotificationsContainer();
@@ -1107,14 +596,45 @@ function showNotification(message, type) {
 /* ------------------------------- Router --------------------------------- */
 
 function navigateTo(route, param) {
-    if (!AppState.currentUser && route !== 'login') {
-        renderLogin();
+    const publicRoute = (
+        route === 'landing'
+        || route === 'login'
+        || route === 'register'
+        || route === 'forgot_password'
+        || route === 'nueva_contrasena'
+        || route === 'politica_seguridad'
+        || route === 'terminos_servicio'
+        || route === 'soporte_sistemas'
+    );
+    if (!AppState.currentUser && !publicRoute) {
+        navigateTo('landing');
         return;
     }
 
     switch (route) {
+        case 'landing':
+            renderLanding();
+            break;
         case 'login':
             renderLogin();
+            break;
+        case 'register':
+            renderRegister();
+            break;
+        case 'forgot_password':
+            renderForgotPassword();
+            break;
+        case 'nueva_contrasena':
+            renderNuevaContrasena();
+            break;
+        case 'politica_seguridad':
+            renderLegalPage('politica_seguridad');
+            break;
+        case 'terminos_servicio':
+            renderLegalPage('terminos_servicio');
+            break;
+        case 'soporte_sistemas':
+            renderLegalPage('soporte_sistemas');
             break;
         case 'dashboard_solicitante':
             renderDashboardSolicitante();
@@ -1158,8 +678,17 @@ function navigateTo(route, param) {
         case 'docs_pm':
             renderDocsPM(param);
             break;
+        case 'admin_usuarios':
+            renderAdminUsuarios();
+            break;
+        case 'mi_perfil':
+            renderMiPerfil();
+            break;
+        case 'admin_storage':
+            renderAdminStorage();
+            break;
         default:
-            renderLogin();
+            renderLanding();
     }
 }
 
@@ -1174,21 +703,609 @@ function navigateToHome() {
 }
 
 function logout() {
-    AppState.currentUser = null;
-    saveState();
-    showNotification('Sesión cerrada correctamente.', 'info');
-    navigateTo('login');
+    void (async () => {
+        try {
+            await PMOSupabase.getSupabase().auth.signOut();
+        } catch (e) {
+            console.warn(e);
+        }
+        AppState.currentUser = null;
+        AppState.requests = [];
+        showNotification('Sesión cerrada correctamente.', 'info');
+        navigateTo('landing');
+    })();
+}
+
+/* -------------------- Páginas legales (público, footer login) ------------ */
+
+const PMO_LEGAL_PAGES = {
+    politica_seguridad: {
+        title: 'Política de Seguridad de la Información',
+        lastUpdated: '25 de abril de 2026',
+        intro:
+            'Este documento establece lineamientos mínimos para el uso del portal de gobierno de la Oficina de Proyectos (PMO) y el tratamiento de la información a la que se accede a través de la misma. Su cumplimiento es obligatorio para todo el personal autorizado.',
+        sections: [
+            {
+                title: '1. Marco y finalidad',
+                paragraphs: [
+                    'La plataforma está destinada a la gestión de solicitudes de proyecto, seguimiento de estados, comentarios y métricas asociadas, conforme a las políticas internas de riesgo y tecnología de la institución.',
+                    'La seguridad de la información es responsabilidad compartida entre el área de tecnología, la PMO y cada usuario. Estas disposiciones complementan, sin sustituir, la normativa corporativa de ciberseguridad y privacidad vigente.'
+                ]
+            },
+            {
+                title: '2. Clasificación y confidencialidad',
+                paragraphs: [
+                    'Los datos tratados (identidad de usuarios, descripciones de solicitudes, presupuestos, documentación adjunta) pueden contener información sensible o reservada. El usuario debe asumir, salvo indicación en contrario, un nivel de confidencialidad equivalente a “uso interno restringido”.',
+                    'Queda prohibido copiar, difundir o almacenar en sistemas no autorizados (correo personal, unidades de consumo, mensajería pública) información obtenida del portal, salvo autorización expresa o requerimiento de auditoría bajo control documentado.'
+                ]
+            },
+            {
+                title: '3. Controles de acceso y autenticación',
+                paragraphs: [
+                    'El acceso se otorga mediante identidad verificable (correo institucional o dominio aprobado) y credenciales personales. Está prohibido compartir cuentas, credenciales o dispositivos de autenticación reforzada si la institución los habilita.',
+                    'Los roles (solicitante, administrador PMO, project manager) definen el alcance de visualización y acciones. Toda excepción de rol debe ser solicitada y aprobada a través de los canales oficiales de administración de cuentas.'
+                ]
+            },
+            {
+                title: '4. Uso aceptable',
+                paragraphs: [
+                    'El usuario se compromete a utilizar el servicio con fines legítimos y profesionales, sin intentar eludir controles, sondear vulnerabilidades no autorizadas, sobrecargar intencionadamente la infraestructura ni alojar software malicioso a través de adjuntos o enlaces.',
+                    'Los comentarios y descripciones deben redactarse con lenguaje respetuoso, sin datos personales de terceros no necesarios para la gestión de la solicitud, en línea con la protección de datos personales y las políticas de conducta de la organización.'
+                ]
+            },
+            {
+                title: '5. Registros, trazabilidad e incidentes',
+                paragraphs: [
+                    'Pueden registrarse, con fines de auditoría y seguridad, accesos, acciones relevantes, direcciones IP aproximadas e identificadores técnicos, de acuerdo con la ley aplicable y las políticas de retención de la entidad.',
+                    'Debe notificarse de inmediato a Ciberseguridad y a la PMO cualquier acceso no reconocido, fuga de credenciales, extravío de equipo o anomalía que pueda afectar la confidencialidad, integridad o disponibilidad del servicio.'
+                ]
+            },
+            {
+                title: '6. Actualizaciones y contacto',
+                paragraphs: [
+                    'Esta política puede ser actualizada. La versión en vigor se publicará en el portal; el uso continuado implica aceptación de las modificaciones materialmente notificadas.',
+                    'Dudas sobre su aplicación pueden canalizarse a través de “Soporte de Sistemas” y a la oficina de riesgo y cumplimiento, según el procedimiento interno de la institución.'
+                ]
+            }
+        ]
+    },
+    terminos_servicio: {
+        title: 'Términos del Servicio',
+        lastUpdated: '25 de abril de 2026',
+        intro:
+            'Los presentes términos rigen el uso del portal de PMO. Al acceder o utilizar el servicio, usted declara haber leído y aceptado estas condiciones en el marco de su relación con la organización o su contratista autorizada, según corresponda.',
+        sections: [
+            {
+                title: '1. Descripción del servicio',
+                paragraphs: [
+                    'El portal permite crear y dar seguimiento a solicitudes de proyecto, conectar a solicitantes y equipos de gobierno (PMO, tecnología, dirección), y consultar estados, comentarios e indicadores operativos definidos en la solución desplegada.',
+                    'La funcionalidad concreta (flujos, aprobaciones, plazos, reportes) puede evolucionar. La institución procurará mantener un comportamiento razonablemente equivalente y notificará cambios sustanciales por los canales internos o dentro de la propia aplicación.'
+                ]
+            },
+            {
+                title: '2. Cuentas y requisitos de acceso',
+                paragraphs: [
+                    'Quien utilice el servicio declara contar con facultad para vincular a su área o representar la necesidad de proyecto indicada, según el modelo de gobierno interno.',
+                    'Las credenciales son personales. El incumplimiento (uso indebido, suplantación, múltiples identidades) puede conllevar la suspensión de acceso y el inicio de actuaciones disciplinarias o legales según el caso.'
+                ]
+            },
+            {
+                title: '3. Uso permitido y restricciones',
+                paragraphs: [
+                    'Se permite el envío de información necesaria para evaluar, priorizar y ejecutar las solicitudes. No está permitido utilizar el portal para fines ilícitos, publicidad, archivos ajenos al objeto del negocio o contenido ofensivo.',
+                    'La carga de archivos (documentos, imágenes) responde a las cuotas, formatos y límites técnicos configurados. El usuario es responsable de respetar la propiedad intelectual y de no incluir software ejecutable o macros no validadas cuando la política lo restrinja.'
+                ]
+            },
+            {
+                title: '4. Disponibilidad y mantenimiento',
+                paragraphs: [
+                    'Se busca un nivel de disponibilidad alineado con plataformas de productividad similares (objetivo típico en la industria: 99,5 % mensual, excluidas ventanas anunciadas), sin que ello constituya obligación sino orientación. Pueden producirse interrupciones por mantenimiento, actualizaciones o causas de fuerza mayor.',
+                    'La institución no será responsable por demoras, errores o daños derivados de fallos de conectividad, proveedores de nube, terceros integrados o factores ajenos a un control razonable.'
+                ]
+            },
+            {
+                title: '5. Propiedad intelectual y datos',
+                paragraphs: [
+                    'El diseño de la aplicación, su marca, textos y componentes propios permanecen bajo la titularidad de la entidad o de sus licenciantes, salvo componentes de código abierto sujetos a sus respectivas licencias.',
+                    'Los metadatos y el contenido aportado por el usuario, en el marco de su labor, se consideran adecuados al objeto del servicio; su tratamiento se regirá por la política de privacidad y las normas internas de la organización, incluida la Política de Seguridad de la Información.'
+                ]
+            },
+            {
+                title: '6. Limitación de responsabilidad e indemnidad',
+                paragraphs: [
+                    'Dentro de lo permitido por ley, el servicio se ofrece “tal cual” y “según disponibilidad”, sin garantías tácitas de comerciabilidad o adecuación a un fin particular, más allá de la diligencia razonable en su operación.',
+                    'En ningún caso la responsabilidad agregada frente a un usuario superará, para reclamaciones directas, el equivalente a las cuotas o costes demostrables vinculados al incidente, salvo dolo, culpa grave o disposición legal imperativa en contrario.'
+                ]
+            },
+            {
+                title: '7. Modificación, suspensión y ley aplicable',
+                paragraphs: [
+                    'La institución puede modificar los términos; la publicación en el portal notifica a los usuarios, salvo que se requiera aceptación explícita adicional (por ejemplo, cambios de tratamiento de datos sujetos a requisito legal).',
+                    'Para la resolución de controversias se aplicarán la legislación y los tribunales de la sede de la entidad, sin perjuicio de mecanismos arbitrales o laborales distintos que deriven de contratos o convenios colectivos vigentes con el usuario, si aplica.'
+                ]
+            }
+        ]
+    },
+    soporte_sistemas: {
+        title: 'Soporte de Sistemas',
+        lastUpdated: '25 de abril de 2026',
+        intro:
+            'A continuación se describen canales, horarios y expectativas de respuesta con el estilo adoptado comúnmente en productos de software empresarial. Los tiempos son orientativos y no sustituyen acuerdos de nivel de servicio (SLA) firmados entre áreas, cuando existan.',
+        sections: [
+            {
+                title: '1. Objetivo del soporte',
+                paragraphs: [
+                    'El área de soporte atiende incidencias técnicas del portal (acceso, rendimiento, errores de la aplicación, configuración de perfiles) y deriva, cuando procede, a la PMO o a ciberseguridad para cuestiones de negocio o de riesgo.',
+                    'Cada reporte se registra con un identificador interno y prioridad, en línea con tablas de severidad alineadas a buenas prácticas ITIL / SDM.'
+                ]
+            },
+            {
+                title: '2. Canales oficiales',
+                paragraphs: [
+                    'Mesa de ayuda / Service Desk: número y extensión publicados en el directorio interno. Correo: soporte@institucion.com (sustituya por el buzón real de su organización; este texto es de referencia de producto).',
+                    'Intranet: busque el catálogo de servicio “Aplicación PMO” para apertura de tickets, base de conocimiento (FAQ) e instructivos. No atendemos requerimientos con datos sensibles por canales no corporativos (WhatsApp personal, etc.).'
+                ],
+                list: [
+                    'Ticket de categoría "Acceso y roles" (cuentas, bloqueos, asignación de perfiles).',
+                    'Ticket de categoría "Defecto o error" (mensajes 500, pantallas inaccesibles, datos inconsistentes).',
+                    'Ticket de categoría "Mejora" (evolutivos no urgentes) con prioridad normal.'
+                ]
+            },
+            {
+                title: '3. Horario de atención',
+                paragraphs: [
+                    'Días laborables, de 08:00 a 20:00 en la zona horaria de la cabecera, con guardia básica o guardia 24/7 solamente si la contratación institucional lo estipula. Fuera de horario, el ticket se encola y se responde al siguiente día hábil, salvo incidentes P1 (críticos) cubiertos por el modelo on-call, cuando esté desplegado.',
+                    'Los fines de semana y festivos locales: solo respuesta a incidentes críticos aprobados por el centro de mando, si aplica a su unidad de negocio.'
+                ]
+            },
+            {
+                title: '4. Criterios de severidad (orientativos, industria)',
+                paragraphs: [
+                    'A efectos de priorización, muchas plantillas corporativas emplean cuatro niveles, similares a productos de mercado; los plazos son máximos orientativos de primera respuesta, no de resolución completa, salvo que su SLA indique otra cosa.',
+                    'P1 (crítico): servicio totalmente inaccesible o brecha de seguridad en curso; primera respuesta típica < 1 h laboral. P2 (alto): degradación severa; típica < 4 h. P3 (medio): fallo parcial, workaround disponible; típica < 1 día. P4 (bajo): consultas, mejoras, documentación; típica < 2–3 días laborables.'
+                ],
+                list: [
+                    'Indique siempre: pantalla, hora, navegador, ID de solicitud, captura de error (sin datos clasificados).',
+                    'Un solo ticket por incidencia evita la fragmentación y acelera el cierre con causa raíz documentada.'
+                ]
+            },
+            {
+                title: '5. Escalación y fuera de alcance',
+                paragraphs: [
+                    'Tras un tiempo de espera o si no hay progreso, el ticket escala a segundo nivel (arquitectura de aplicación o DBA) y, si procede, a la PMO o al responsable de negocio indicado en el anexo de gobierno.',
+                    'Queda fuera de alcance el soporte a equipos de usuario no gestionados, redes domésticas, o decisiones de prioridad de proyectos, que competen a los comités de inversión o a la propia PMO, no a la mesa de ayuda de sistemas.'
+                ]
+            }
+        ]
+    }
+};
+
+/**
+ * @param {'politica_seguridad'|'terminos_servicio'|'soporte_sistemas'} pageId
+ */
+function renderLegalPage(pageId) {
+    const def = PMO_LEGAL_PAGES[pageId];
+    if (!def) {
+        navigateTo('login');
+        return;
+    }
+    AppState.currentView = pageId;
+    const root = clearAppRoot();
+    document.body.classList.add('has-fixed-footer');
+
+    const main = document.createElement('main');
+    main.className = 'legal-page';
+
+    const decor = document.createElement('div');
+    decor.className = 'legal-page__decor';
+    decor.setAttribute('aria-hidden', 'true');
+    const g1 = document.createElement('div');
+    g1.className = 'legal-page__glow legal-page__glow--1';
+    const g2 = document.createElement('div');
+    g2.className = 'legal-page__glow legal-page__glow--2';
+    decor.appendChild(g1);
+    decor.appendChild(g2);
+    main.appendChild(decor);
+
+    const inner = document.createElement('div');
+    inner.className = 'legal-page__inner';
+
+    const back = document.createElement('a');
+    back.href = '#';
+    back.className = 'legal-page__back';
+    const backIcon = createIcon('arrow_back', 'legal-page__back-icon');
+    const backSpan = document.createElement('span');
+    backSpan.textContent = 'Volver al inicio de sesión';
+    back.appendChild(backIcon);
+    back.appendChild(backSpan);
+    back.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        navigateTo('login');
+    });
+
+    const h1 = document.createElement('h1');
+    h1.className = 'legal-page__title text-headline-md';
+    h1.textContent = def.title;
+
+    const meta = document.createElement('p');
+    meta.className = 'legal-page__meta text-body-sm';
+    meta.textContent = `Documento informativo · Última actualización: ${def.lastUpdated}`;
+
+    const intro = document.createElement('p');
+    intro.className = 'legal-page__intro text-body-sm';
+    intro.textContent = def.intro;
+
+    const article = document.createElement('article');
+    article.className = 'legal-page__article';
+
+    def.sections.forEach((sec) => {
+        const section = document.createElement('section');
+        section.className = 'legal-page__section';
+        const h2 = document.createElement('h2');
+        h2.className = 'legal-page__section-title text-title-sm';
+        h2.textContent = sec.title;
+        section.appendChild(h2);
+        sec.paragraphs.forEach((pt) => {
+            const p = document.createElement('p');
+            p.className = 'legal-page__paragraph text-body-sm';
+            p.textContent = pt;
+            section.appendChild(p);
+        });
+        if (sec.list && sec.list.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'legal-page__list';
+            sec.list.forEach((line) => {
+                const li = document.createElement('li');
+                li.className = 'legal-page__list-item text-body-sm';
+                li.textContent = line;
+                ul.appendChild(li);
+            });
+            section.appendChild(ul);
+        }
+        article.appendChild(section);
+    });
+
+    inner.appendChild(back);
+    inner.appendChild(h1);
+    inner.appendChild(meta);
+    inner.appendChild(intro);
+    inner.appendChild(article);
+
+    main.appendChild(inner);
+    root.appendChild(main);
+    root.appendChild(createAuthFooter({ showInicio: true }));
+}
+
+/**
+ * @param {{ showInicio?: boolean }} [options] En la portada no se muestra el enlace Inicio
+ * @returns {HTMLElement}
+ */
+function createAuthFooter(options) {
+    const showInicio = !options || options.showInicio !== false;
+    const footer = document.createElement('footer');
+    footer.className = 'footer footer--login';
+    const links = document.createElement('div');
+    links.className = 'footer__links';
+    const baseItems = [
+        { text: 'Política de Seguridad', route: 'politica_seguridad' },
+        { text: 'Términos del Servicio', route: 'terminos_servicio' },
+        { text: 'Soporte de Sistemas', route: 'soporte_sistemas' }
+    ];
+    const items = showInicio
+        ? [{ text: 'Inicio', route: 'landing' }, ...baseItems]
+        : baseItems;
+    items.forEach(({ text, route }) => {
+        const a = document.createElement('a');
+        a.href = '#';
+        a.className = 'footer__link';
+        a.textContent = text;
+        a.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            navigateTo(route);
+        });
+        links.appendChild(a);
+    });
+    footer.appendChild(links);
+    return footer;
+}
+
+/* ------------------------ Landing (portada) ----------------------------- */
+
+const LANDING_FEATURES = [
+    { icon: 'account_tree', title: 'Etapas y gobierno', text: 'De borrador a aprobado, con visibilidad para PMO y Tecnología.' },
+    { icon: 'chat', title: 'Comentarios y trazabilidad', text: 'Diálogo y registro en un solo lugar.' },
+    { icon: 'bar_chart', title: 'Métricas', text: 'Cartera, estados y desempeño a la vista.' },
+    { icon: 'group', title: 'Roles', text: 'Solicitante, PM, administrador: permisos claros.' },
+    { icon: 'description', title: 'Solicitudes', text: 'Formularios consistentes hacia Tecnología.' },
+    { icon: 'cloud_upload', title: 'Evidencia', text: 'Documentos y etapas alineados al flujo.' }
+];
+
+const LANDING_BENEFITS = [
+    { title: 'Prioriza y da seguimiento en un solo espacio', kicker: 'Cartera' },
+    { title: 'Etapas, aprobaciones y roles con el mismo criterio', kicker: 'Gobierno' },
+    { title: 'Comentarios e historial listos al revisar', kicker: 'Trazabilidad' }
+];
+
+function createLandingFeatureCard(data, index) {
+    const card = document.createElement('article');
+    const tone = ['a', 'b', 'c'][index % 3];
+    card.className = `landing__feature landing__feature--${tone}`;
+    const iconWrap = document.createElement('div');
+    iconWrap.className = 'landing__feature-icon';
+    iconWrap.appendChild(createIcon(data.icon, 'landing__feature-icon-glyph'));
+    const h3 = document.createElement('h3');
+    h3.className = 'landing__feature-title text-title-sm';
+    h3.textContent = data.title;
+    const p = document.createElement('p');
+    p.className = 'landing__feature-text text-body-sm';
+    p.textContent = data.text;
+    card.appendChild(iconWrap);
+    card.appendChild(h3);
+    card.appendChild(p);
+    return card;
+}
+
+function createLandingCtaGroup(modifier) {
+    const group = document.createElement('div');
+    group.className = modifier
+        ? `landing__actions landing__actions--${modifier}`
+        : 'landing__actions';
+    const startBtn = createButton('Comenzar', 'primary', 'rocket_launch', () => {
+        navigateTo('register');
+    });
+    startBtn.setAttribute('aria-label', 'Crear una cuenta: comenzar');
+    group.appendChild(startBtn);
+    if (modifier !== 'hero') {
+        const loginBtn = createButton('Iniciar sesión', 'secondary', 'login', () => {
+            navigateTo('login');
+        });
+        group.appendChild(loginBtn);
+    }
+    return group;
+}
+
+function renderLanding() {
+    AppState.currentView = 'landing';
+    document.title = 'PMO Workflow — Gobierno de solicitudes de proyecto';
+    const root = clearAppRoot();
+    document.body.classList.add('has-fixed-footer');
+
+    const main = document.createElement('main');
+    main.className = 'landing';
+    main.setAttribute('aria-label', 'Portada del producto PMO Workflow');
+
+    const bg = document.createElement('div');
+    bg.className = 'landing__bg';
+    bg.setAttribute('aria-hidden', 'true');
+    const o1 = document.createElement('div');
+    o1.className = 'landing__orb landing__orb--1';
+    const o2 = document.createElement('div');
+    o2.className = 'landing__orb landing__orb--2';
+    const o3 = document.createElement('div');
+    o3.className = 'landing__orb landing__orb--3';
+    bg.appendChild(o1);
+    bg.appendChild(o2);
+    bg.appendChild(o3);
+    main.appendChild(bg);
+
+    const header = document.createElement('header');
+    header.className = 'landing__header';
+    const headInner = document.createElement('div');
+    headInner.className = 'landing__header-inner';
+    const logo = document.createElement('a');
+    logo.href = '#';
+    logo.className = 'landing__logo';
+    logo.setAttribute('aria-label', 'PMO Workflow, inicio de portada');
+    logo.appendChild(createIcon('account_tree', 'landing__logo-icon'));
+    const logoText = document.createElement('span');
+    logoText.className = 'landing__logo-text';
+    logoText.textContent = 'PMO Workflow';
+    logo.appendChild(logoText);
+    logo.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (typeof window !== 'undefined') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+    const nav = document.createElement('div');
+    nav.className = 'landing__nav-cta';
+    const navIn = createButton('Iniciar sesión', 'secondary', 'login', () => {
+        navigateTo('login');
+    });
+    navIn.classList.add('button--sm');
+    nav.appendChild(navIn);
+    headInner.appendChild(logo);
+    headInner.appendChild(nav);
+    header.appendChild(headInner);
+    main.appendChild(header);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'landing__wrap';
+
+    const hero = document.createElement('section');
+    hero.className = 'landing__hero';
+    hero.setAttribute('aria-labelledby', 'landing-hero-title');
+    const heroBox = document.createElement('div');
+    heroBox.className = 'landing__panel landing__panel--hero';
+    const eyebrow = document.createElement('p');
+    eyebrow.className = 'landing__eyebrow text-label-caps';
+    eyebrow.textContent = 'Cartera · Gobierno · Tecnología';
+    const h1 = document.createElement('h1');
+    h1.id = 'landing-hero-title';
+    h1.className = 'landing__title';
+    h1.textContent = 'Administra tu portafolio de proyectos, de la idea a la puesta en producción';
+    const lead = document.createElement('p');
+    lead.className = 'landing__lead text-body-md';
+    lead.textContent = 'Solicitudes, comentarios y métricas sin dispersar en correos ni hojas.';
+    const heroCta = createLandingCtaGroup('hero');
+    heroBox.appendChild(eyebrow);
+    heroBox.appendChild(h1);
+    heroBox.appendChild(lead);
+    heroBox.appendChild(heroCta);
+    hero.appendChild(heroBox);
+    wrap.appendChild(hero);
+
+    const strip = document.createElement('div');
+    strip.className = 'landing__strip landing__panel landing__panel--mid';
+    const stripLabel = document.createElement('p');
+    stripLabel.className = 'landing__strip-title text-title-sm';
+    stripLabel.textContent = 'Una sola vista de la cartera, riesgo bajo control';
+    const labels = document.createElement('ul');
+    labels.className = 'landing__strip-list';
+    ['Cartera', 'Riesgo', 'Auditoría'].forEach((t) => {
+        const li = document.createElement('li');
+        li.className = 'landing__strip-item text-body-sm';
+        li.textContent = t;
+        labels.appendChild(li);
+    });
+    strip.appendChild(stripLabel);
+    strip.appendChild(labels);
+    wrap.appendChild(strip);
+
+    const featSection = document.createElement('section');
+    featSection.className = 'landing__section';
+    featSection.setAttribute('aria-labelledby', 'landing-feat-h');
+    const featHead = document.createElement('h2');
+    featHead.id = 'landing-feat-h';
+    featHead.className = 'landing__section-title text-headline-md';
+    featHead.textContent = 'Lo esencial, en claro';
+    const grid = document.createElement('div');
+    grid.className = 'landing__grid';
+    LANDING_FEATURES.forEach((item, index) => {
+        grid.appendChild(createLandingFeatureCard(item, index));
+    });
+    featSection.appendChild(featHead);
+    featSection.appendChild(grid);
+    wrap.appendChild(featSection);
+
+    const benSection = document.createElement('section');
+    benSection.className = 'landing__section';
+    benSection.setAttribute('aria-labelledby', 'landing-ben-h');
+    const benHead = document.createElement('h2');
+    benHead.id = 'landing-ben-h';
+    benHead.className = 'landing__section-title text-headline-md';
+    benHead.textContent = 'Tres capas, un solo flujo';
+    const benRow = document.createElement('div');
+    benRow.className = 'landing__benefit-row';
+    LANDING_BENEFITS.forEach((b, i) => {
+        const bCard = document.createElement('div');
+        bCard.className = `landing__benefit-pill landing__benefit-pill--${(i % 3) + 1}`;
+        const bK = document.createElement('span');
+        bK.className = 'landing__benefit-pill-k';
+        bK.textContent = b.kicker;
+        const bTitle = document.createElement('h3');
+        bTitle.className = 'landing__benefit-pill-t';
+        bTitle.textContent = b.title;
+        bCard.appendChild(bK);
+        bCard.appendChild(bTitle);
+        benRow.appendChild(bCard);
+    });
+    benSection.appendChild(benHead);
+    benSection.appendChild(benRow);
+    wrap.appendChild(benSection);
+
+    const cta = document.createElement('section');
+    cta.className = 'landing__section landing__section--cta';
+    cta.setAttribute('aria-labelledby', 'landing-cta-h');
+    const ctaBox = document.createElement('div');
+    ctaBox.className = 'landing__cta-box';
+    const ctaH = document.createElement('h2');
+    ctaH.id = 'landing-cta-h';
+    ctaH.className = 'landing__cta-title text-headline-md';
+    ctaH.textContent = 'Entre al portal';
+    const ctaP = document.createElement('p');
+    ctaP.className = 'landing__cta-lead text-body-sm';
+    ctaP.textContent = 'Cuenta nueva o inicio de sesión con su usuario institucional.';
+    ctaBox.appendChild(ctaH);
+    ctaBox.appendChild(ctaP);
+    ctaBox.appendChild(createLandingCtaGroup('footer'));
+    cta.appendChild(ctaBox);
+    wrap.appendChild(cta);
+
+    main.appendChild(wrap);
+    root.appendChild(main);
+    root.appendChild(createAuthFooter({ showInicio: false }));
 }
 
 /* ------------------------------- Login ---------------------------------- */
 
 function renderLogin() {
     AppState.currentView = 'login';
+    document.title = 'Iniciar sesión — PMO Bancaria';
     const root = clearAppRoot();
     document.body.classList.add('has-fixed-footer');
 
     const loginView = document.createElement('main');
     loginView.className = 'login-view';
+
+    const decor = document.createElement('div');
+    decor.className = 'login-view__decor';
+    decor.setAttribute('aria-hidden', 'true');
+    const glow1 = document.createElement('div');
+    glow1.className = 'login-view__glow login-view__glow--1';
+    const glow2 = document.createElement('div');
+    glow2.className = 'login-view__glow login-view__glow--2';
+    decor.appendChild(glow1);
+    decor.appendChild(glow2);
+    loginView.appendChild(decor);
+
+    const frame = document.createElement('div');
+    frame.className = 'login-view__frame';
+
+    const pageHeader = document.createElement('header');
+    pageHeader.className = 'login-view__header';
+    const backToLanding = document.createElement('a');
+    backToLanding.href = '#';
+    backToLanding.className = 'login-view__back';
+    backToLanding.setAttribute('aria-label', 'Volver a la portada');
+    backToLanding.title = 'Volver a la portada';
+    backToLanding.appendChild(createIcon('arrow_back', 'login-view__back-icon'));
+    backToLanding.addEventListener('click', (event) => {
+        event.preventDefault();
+        navigateTo('landing');
+    });
+    pageHeader.appendChild(backToLanding);
+    frame.appendChild(pageHeader);
+
+    const shell = document.createElement('div');
+    shell.className = 'login-view__shell';
+
+    const brand = document.createElement('aside');
+    brand.className = 'login-view__brand';
+    brand.setAttribute('aria-label', 'Descripción del portal');
+
+    const brandInner = document.createElement('div');
+    brandInner.className = 'login-view__brand-inner';
+
+    const brandKicker = document.createElement('p');
+    brandKicker.className = 'login-view__brand-kicker';
+    brandKicker.textContent = 'Banca · Tecnología';
+
+    const brandTitle = document.createElement('h2');
+    brandTitle.className = 'login-view__brand-title';
+    brandTitle.textContent = 'Oficina de Proyectos';
+
+    const brandSub = document.createElement('p');
+    brandSub.className = 'login-view__brand-sub';
+    brandSub.textContent =
+        'Gobierno, trazabilidad y priorización de solicitudes hacia el área de tecnología.';
+
+    const brandBadge = document.createElement('div');
+    brandBadge.className = 'login-view__brand-badge';
+    const badgeIcon = createIcon('verified_user', 'login-view__brand-badge-icon');
+    const badgeText = document.createElement('span');
+    badgeText.textContent = 'Entorno corporativo';
+    brandBadge.appendChild(badgeIcon);
+    brandBadge.appendChild(badgeText);
+
+    brandInner.appendChild(brandKicker);
+    brandInner.appendChild(brandTitle);
+    brandInner.appendChild(brandSub);
+    brandInner.appendChild(brandBadge);
+    brand.appendChild(brandInner);
+
+    const cardCol = document.createElement('div');
+    cardCol.className = 'login-view__card-col';
 
     const loginCard = document.createElement('div');
     loginCard.className = 'login-card';
@@ -1198,7 +1315,7 @@ function renderLogin() {
 
     const iconContainer = document.createElement('div');
     iconContainer.className = 'login-card__icon-container';
-    iconContainer.appendChild(createIcon('account_balance', 'login-card__icon'));
+    iconContainer.appendChild(createIcon('account_tree', 'login-card__icon'));
     header.appendChild(iconContainer);
 
     const title = document.createElement('h1');
@@ -1234,31 +1351,42 @@ function renderLogin() {
     });
     form.appendChild(passwordField.group);
 
+    const forgotP = document.createElement('p');
+    forgotP.className = 'login-card__forgot text-body-sm';
+    const forgotLink = document.createElement('a');
+    forgotLink.href = '#';
+    forgotLink.className = 'login-card__link';
+    forgotLink.textContent = '¿Olvidó su contraseña?';
+    forgotLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        navigateTo('forgot_password');
+    });
+    forgotP.appendChild(forgotLink);
+    form.appendChild(forgotP);
+
     const submitBtn = createButton('Iniciar Sesión', 'primary', 'login', null, 'submit');
     submitBtn.classList.add('button--block');
     form.appendChild(submitBtn);
 
-    const demoInfo = document.createElement('div');
-    demoInfo.className = 'login-card__demo';
-    const demoTitle = document.createElement('div');
-    const demoStrong = document.createElement('strong');
-    demoStrong.textContent = 'Credenciales de demostración';
-    demoTitle.appendChild(demoStrong);
-    demoInfo.appendChild(demoTitle);
+    const registerP = document.createElement('p');
+    registerP.className = 'login-card__register text-body-sm';
+    const registerLink = document.createElement('a');
+    registerLink.href = '#';
+    registerLink.className = 'login-card__link';
+    registerLink.textContent = 'Crear una cuenta (solicitante)';
+    registerLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        navigateTo('register');
+    });
+    registerP.appendChild(registerLink);
+    form.appendChild(registerP);
 
-    const demoSol = document.createElement('div');
-    demoSol.textContent = `Solicitante: ${DEMO_CREDENTIALS.solicitante.email} / ${DEMO_CREDENTIALS.solicitante.password}`;
-    demoInfo.appendChild(demoSol);
-
-    const demoAdm = document.createElement('div');
-    demoAdm.textContent = `Administrador: ${DEMO_CREDENTIALS.admin.email} / ${DEMO_CREDENTIALS.admin.password}`;
-    demoInfo.appendChild(demoAdm);
-
-    const demoPM = document.createElement('div');
-    demoPM.textContent = `Project Manager: ${DEMO_CREDENTIALS.pm.email} / ${DEMO_CREDENTIALS.pm.password}`;
-    demoInfo.appendChild(demoPM);
-
-    form.appendChild(demoInfo);
+    if (!PMOSupabase.isConfigValid()) {
+        const errBox = document.createElement('p');
+        errBox.className = 'login-card__error text-body-sm';
+        errBox.textContent = 'Falta configurar Supabase: URL (https://….supabase.co) y clave pública anon (empieza por eyJ) en el archivo de config.';
+        form.appendChild(errBox);
+    }
 
     form.addEventListener('submit', (event) => {
         event.preventDefault();
@@ -1279,27 +1407,45 @@ function renderLogin() {
             hasError = true;
         }
 
-        if (hasError) return;
-
-        let role = null;
-        if (email === DEMO_CREDENTIALS.solicitante.email && password === DEMO_CREDENTIALS.solicitante.password) {
-            role = ROLE_SOLICITANTE;
-        } else if (email === DEMO_CREDENTIALS.admin.email && password === DEMO_CREDENTIALS.admin.password) {
-            role = ROLE_ADMIN;
-        } else if (email === DEMO_CREDENTIALS.pm.email && password === DEMO_CREDENTIALS.pm.password) {
-            role = ROLE_PM;
-        }
-
-        if (!role) {
-            showFieldError(passwordField.input, 'Credenciales incorrectas. Verifique sus datos.');
-            showNotification('No se pudo iniciar sesión. Verifique sus credenciales.', 'error');
+        if (hasError) {
             return;
         }
 
-        AppState.currentUser = { role, email };
-        saveState();
-        showNotification(`Bienvenido al portal, ${email}.`, 'success');
-        navigateToHome();
+        if (!PMOSupabase.isConfigValid()) {
+            showNotification('Configuración de Supabase incompleta. Copie Project URL y la clave anon (eyJ...) desde el panel, en su archivo de config.', 'error');
+            return;
+        }
+
+        void (async () => {
+            const sb = PMOSupabase.getSupabase();
+            const { data, error } = await sb.auth.signInWithPassword({ email, password });
+            if (error) {
+                const net = formatAuthClientError(error);
+                if (net.indexOf('No se pudo conectar') === 0) {
+                    showNotification(net, 'error');
+                    return;
+                }
+                showFieldError(passwordField.input, 'Credenciales incorrectas o cuenta no verificada.');
+                showNotification(error.message || 'No se pudo iniciar sesión.', 'error');
+                return;
+            }
+            if (!data.user) {
+                return;
+            }
+            try {
+                const profile = await PMOSupabase.fetchCurrentProfile();
+                const ok = await applyProfileAfterAuth(profile);
+                if (!ok) {
+                    return;
+                }
+                await refreshRequestsFromServer();
+                showNotification(`Bienvenido al portal, ${profile.email}.`, 'success');
+                navigateToHome();
+            } catch (err) {
+                console.error(err);
+                showNotification('No se pudo cargar el perfil. Intente de nuevo.', 'error');
+            }
+        })();
     });
 
     loginCard.appendChild(form);
@@ -1312,30 +1458,433 @@ function renderLogin() {
     footerNote.appendChild(noteText);
     loginCard.appendChild(footerNote);
 
-    loginView.appendChild(loginCard);
-
-    const footer = document.createElement('footer');
-    footer.className = 'footer';
-
-    const copyright = document.createElement('div');
-    copyright.className = 'footer__copyright';
-    copyright.textContent = '© 2024 Sistemas PMO Institucionales. Acceso restringido a personal autorizado.';
-    footer.appendChild(copyright);
-
-    const links = document.createElement('div');
-    links.className = 'footer__links';
-    ['Política de Seguridad', 'Términos del Servicio', 'Soporte de Sistemas'].forEach((text) => {
-        const link = document.createElement('a');
-        link.href = '#';
-        link.className = 'footer__link';
-        link.textContent = text;
-        link.addEventListener('click', (event) => event.preventDefault());
-        links.appendChild(link);
-    });
-    footer.appendChild(links);
+    cardCol.appendChild(loginCard);
+    shell.appendChild(brand);
+    shell.appendChild(cardCol);
+    frame.appendChild(shell);
+    loginView.appendChild(frame);
 
     root.appendChild(loginView);
-    root.appendChild(footer);
+    root.appendChild(createAuthFooter());
+}
+
+function renderRegister() {
+    AppState.currentView = 'register';
+    document.title = 'Crear cuenta — PMO Workflow';
+    const root = clearAppRoot();
+    document.body.classList.add('has-fixed-footer');
+
+    const main = document.createElement('main');
+    main.className = 'login-view';
+
+    const decor = document.createElement('div');
+    decor.className = 'login-view__decor';
+    decor.setAttribute('aria-hidden', 'true');
+    const regGlow1 = document.createElement('div');
+    regGlow1.className = 'login-view__glow login-view__glow--1';
+    const regGlow2 = document.createElement('div');
+    regGlow2.className = 'login-view__glow login-view__glow--2';
+    decor.appendChild(regGlow1);
+    decor.appendChild(regGlow2);
+    main.appendChild(decor);
+
+    const frame = document.createElement('div');
+    frame.className = 'login-view__frame';
+    const pageHeader = document.createElement('header');
+    pageHeader.className = 'login-view__header';
+    const regBackLanding = document.createElement('a');
+    regBackLanding.href = '#';
+    regBackLanding.className = 'login-view__back';
+    regBackLanding.setAttribute('aria-label', 'Volver a la portada');
+    regBackLanding.title = 'Volver a la portada';
+    regBackLanding.appendChild(createIcon('arrow_back', 'login-view__back-icon'));
+    regBackLanding.addEventListener('click', (event) => {
+        event.preventDefault();
+        navigateTo('landing');
+    });
+    pageHeader.appendChild(regBackLanding);
+    frame.appendChild(pageHeader);
+
+    const shell = document.createElement('div');
+    shell.className = 'login-view__shell login-view__shell--register';
+
+    const cardCol = document.createElement('div');
+    cardCol.className = 'login-view__card-col';
+
+    const card = document.createElement('div');
+    card.className = 'login-card';
+
+    const header = document.createElement('div');
+    header.className = 'login-card__header';
+    const iconC = document.createElement('div');
+    iconC.className = 'login-card__icon-container';
+    iconC.appendChild(createIcon('person_add', 'login-card__icon'));
+    header.appendChild(iconC);
+    const title = document.createElement('h1');
+    title.className = 'text-headline-md login-card__title';
+    title.textContent = 'Crear cuenta';
+    header.appendChild(title);
+    const sub = document.createElement('p');
+    sub.className = 'text-body-sm login-card__subtitle';
+    sub.textContent = 'Elija el perfil deseado. Los roles Administrador o Project Manager requieren aprobación de un administrador; hasta entonces su acceso es como solicitante.';
+    header.appendChild(sub);
+    card.appendChild(header);
+
+    const form = document.createElement('form');
+    form.noValidate = true;
+    const emailF = createFormField({ id: 'reg-email', label: 'Correo', type: 'email', required: true, placeholder: 'usuario@banco.com' });
+    const regRoleF = createFormField({
+        id: 'reg-role',
+        label: 'Tipo de cuenta deseada',
+        type: 'select',
+        required: true,
+        value: 'solicitante',
+        choices: [
+            { value: 'solicitante', label: 'Solicitante' },
+            { value: 'admin', label: 'Administrador PMO' },
+            { value: 'project_manager', label: 'Project Manager' }
+        ]
+    });
+    const pass1 = createFormField({ id: 'reg-pw1', label: 'Contraseña (mín. 6 caracteres)', type: 'password', required: true, placeholder: 'Contraseña' });
+    const pass2 = createFormField({ id: 'reg-pw2', label: 'Confirmar contraseña', type: 'password', required: true, placeholder: 'Repita la contraseña' });
+    form.appendChild(emailF.group);
+    form.appendChild(regRoleF.group);
+    form.appendChild(pass1.group);
+    form.appendChild(pass2.group);
+    const btn = createButton('Registrarme', 'primary', 'person_add', null, 'submit');
+    btn.classList.add('button--block');
+    form.appendChild(btn);
+
+    const back = document.createElement('a');
+    back.href = '#';
+    back.className = 'login-card__link text-body-sm';
+    back.textContent = 'Volver a inicio de sesión';
+    back.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        navigateTo('login');
+    });
+    const backP = document.createElement('p');
+    backP.className = 'login-card__register';
+    backP.appendChild(back);
+    form.appendChild(backP);
+
+    if (!PMOSupabase.isConfigValid()) {
+        const errBox = document.createElement('p');
+        errBox.className = 'login-card__error text-body-sm';
+        errBox.textContent = 'Falta configurar Supabase: URL y clave pública anon en el archivo de config.';
+        form.appendChild(errBox);
+    }
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (!PMOSupabase.isConfigValid()) {
+            showNotification('Configuración de Supabase incompleta. Rellene la URL (https://xxxxx.supabase.co) y la clave anon pública (eyJ...) en el config.', 'error');
+            return;
+        }
+        const em = emailF.input.value.trim();
+        const p1 = pass1.input.value;
+        const p2 = pass2.input.value;
+        if (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
+            showFieldError(emailF.input, 'Ingrese un correo válido.');
+            return;
+        }
+        if (p1.length < 6) {
+            showFieldError(pass1.input, 'Mínimo 6 caracteres.');
+            return;
+        }
+        if (p1 !== p2) {
+            showFieldError(pass2.input, 'Las contraseñas no coinciden.');
+            return;
+        }
+        const tipoCuenta = regRoleF.input.value;
+        void (async () => {
+            const { data, error } = await PMOSupabase.getSupabase().auth.signUp({
+                email: em,
+                password: p1,
+                options: { data: { requested_app_role: tipoCuenta } }
+            });
+            if (error) {
+                showNotification(formatAuthClientError(error), 'error');
+                return;
+            }
+            if (data.user && !data.session) {
+                let msg = 'Revise su correo para confirmar el registro, luego inicie sesión.';
+                if (tipoCuenta === 'admin' || tipoCuenta === 'project_manager') {
+                    msg = 'Cuenta creada. Tras confirmar el correo, inicie sesión. Un administrador deberá aprobar su solicitud de rol de ' + (DB_ROLE_LABELS[tipoCuenta] || tipoCuenta) + '.';
+                }
+                showNotification(msg, 'info');
+                navigateTo('login');
+            } else if (data.session) {
+                try {
+                    const profile = await PMOSupabase.fetchCurrentProfile();
+                    const ok = await applyProfileAfterAuth(profile);
+                    if (!ok) {
+                        return;
+                    }
+                    await refreshRequestsFromServer();
+                    let msg = 'Cuenta creada correctamente.';
+                    if (profile.requestedRole === 'admin' || profile.requestedRole === 'project_manager') {
+                        msg = 'Cuenta creada. Un administrador debe aprobar su solicitud de ' + (DB_ROLE_LABELS[profile.requestedRole] || 'rol') + ' en Usuarios y cuentas.';
+                    }
+                    showNotification(msg, 'success');
+                    navigateToHome();
+                } catch (e) {
+                    console.error(e);
+                    showNotification('Cuenta creada. Inicie sesión.', 'info');
+                    navigateTo('login');
+                }
+            }
+        })();
+    });
+
+    card.appendChild(form);
+
+    const regBrand = document.createElement('aside');
+    regBrand.className = 'login-view__brand';
+    regBrand.setAttribute('aria-label', 'Información sobre el registro');
+    const regBrandInner = document.createElement('div');
+    regBrandInner.className = 'login-view__brand-inner';
+    const regKicker = document.createElement('p');
+    regKicker.className = 'login-view__brand-kicker';
+    regKicker.textContent = 'Cuenta nueva';
+    const regBrandTitle = document.createElement('h2');
+    regBrandTitle.className = 'login-view__brand-title';
+    regBrandTitle.textContent = 'Únase a PMO Workflow';
+    const regBrandSub = document.createElement('p');
+    regBrandSub.className = 'login-view__brand-sub';
+    regBrandSub.textContent =
+        'Cree su acceso con correo institucional. Los roles de administrador o Project Manager requieren validación; hasta entonces podrá actuar como solicitante.';
+    const regBadge = document.createElement('div');
+    regBadge.className = 'login-view__brand-badge';
+    regBadge.appendChild(createIcon('mark_email_unread', 'login-view__brand-badge-icon'));
+    const regBadgeText = document.createElement('span');
+    regBadgeText.textContent = 'Confirme el correo para activar';
+    regBadge.appendChild(regBadgeText);
+    regBrandInner.appendChild(regKicker);
+    regBrandInner.appendChild(regBrandTitle);
+    regBrandInner.appendChild(regBrandSub);
+    regBrandInner.appendChild(regBadge);
+    regBrand.appendChild(regBrandInner);
+
+    cardCol.appendChild(card);
+    shell.appendChild(cardCol);
+    shell.appendChild(regBrand);
+    frame.appendChild(shell);
+    main.appendChild(frame);
+    root.appendChild(main);
+    root.appendChild(createAuthFooter());
+}
+
+function renderForgotPassword() {
+    AppState.currentView = 'forgot_password';
+    const root = clearAppRoot();
+    document.body.classList.add('has-fixed-footer');
+
+    const main = document.createElement('main');
+    main.className = 'login-view';
+
+    const card = document.createElement('div');
+    card.className = 'login-card';
+
+    const header = document.createElement('div');
+    header.className = 'login-card__header';
+    const iconC = document.createElement('div');
+    iconC.className = 'login-card__icon-container';
+    iconC.appendChild(createIcon('lock_reset', 'login-card__icon'));
+    header.appendChild(iconC);
+    const title = document.createElement('h1');
+    title.className = 'text-headline-md login-card__title';
+    title.textContent = 'Recuperar contraseña';
+    header.appendChild(title);
+    const sub = document.createElement('p');
+    sub.className = 'text-body-sm login-card__subtitle';
+    sub.textContent = 'Escriba su correo. Recibirá un enlace para restablecer la contraseña (reviso también el spam).';
+    header.appendChild(sub);
+    card.appendChild(header);
+
+    const form = document.createElement('form');
+    form.noValidate = true;
+    const emailF = createFormField({
+        id: 'forgot-email',
+        label: 'Correo electrónico',
+        type: 'email',
+        required: true,
+        placeholder: 'usuario@banco.com'
+    });
+    form.appendChild(emailF.group);
+
+    const submitBtn = createButton('Enviar enlace', 'primary', 'send', null, 'submit');
+    submitBtn.classList.add('button--block');
+    form.appendChild(submitBtn);
+
+    const back = document.createElement('a');
+    back.href = '#';
+    back.className = 'login-card__link text-body-sm';
+    back.textContent = 'Volver a inicio de sesión';
+    back.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        navigateTo('login');
+    });
+    const backP = document.createElement('p');
+    backP.className = 'login-card__register';
+    backP.appendChild(back);
+    form.appendChild(backP);
+
+    if (!PMOSupabase.isConfigValid()) {
+        const errBox = document.createElement('p');
+        errBox.className = 'login-card__error text-body-sm';
+        errBox.textContent = 'Falta configurar Supabase en el archivo de config.';
+        form.appendChild(errBox);
+    }
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (!PMOSupabase.isConfigValid()) {
+            showNotification('Configure la URL y la clave anon en el config.', 'error');
+            return;
+        }
+        const em = emailF.input.value.trim();
+        if (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
+            showFieldError(emailF.input, 'Ingrese un correo válido.');
+            return;
+        }
+        void (async () => {
+            try {
+                const { error } = await PMOSupabase.requestPasswordResetEmail(em);
+                if (error) {
+                    showNotification(formatAuthClientError(error), 'error');
+                    return;
+                }
+                showNotification('Si el correo está registrado, le enviaremos un enlace para restablecer la contraseña.', 'info');
+                navigateTo('login');
+            } catch (e) {
+                console.error(e);
+                const msg = (e && e.message) ? String(e.message) : 'No se pudo enviar el correo.';
+                showNotification(msg, 'error');
+            }
+        })();
+    });
+
+    card.appendChild(form);
+    main.appendChild(card);
+    root.appendChild(main);
+}
+
+function renderNuevaContrasena() {
+    void (async () => {
+        if (!PMOSupabase || !PMOSupabase.getSupabase) {
+            return;
+        }
+        const { data: s } = await PMOSupabase.getSupabase().auth.getSession();
+        if (!s.session) {
+            showNotification('Sesión de recuperación no disponible. Solicite un nuevo enlace desde Iniciar sesión.', 'error');
+            navigateTo('login');
+            return;
+        }
+        doRenderNuevaContrasenaForm();
+    })();
+}
+
+function doRenderNuevaContrasenaForm() {
+    AppState.currentView = 'nueva_contrasena';
+    const root = clearAppRoot();
+    document.body.classList.add('has-fixed-footer');
+
+    const main = document.createElement('main');
+    main.className = 'login-view';
+    const card = document.createElement('div');
+    card.className = 'login-card';
+
+    const header = document.createElement('div');
+    header.className = 'login-card__header';
+    const iconC = document.createElement('div');
+    iconC.className = 'login-card__icon-container';
+    iconC.appendChild(createIcon('passkey', 'login-card__icon'));
+    header.appendChild(iconC);
+    const title = document.createElement('h1');
+    title.className = 'text-headline-md login-card__title';
+    title.textContent = 'Nueva contraseña';
+    header.appendChild(title);
+    const sub = document.createElement('p');
+    sub.className = 'text-body-sm login-card__subtitle';
+    sub.textContent = 'Elija una contraseña segura (mínimo 6 caracteres) y no la comparta con terceros.';
+    header.appendChild(sub);
+    card.appendChild(header);
+
+    const form = document.createElement('form');
+    form.noValidate = true;
+    const p1 = createFormField({ id: 'new-pw1', label: 'Nueva contraseña', type: 'password', required: true, placeholder: 'Nueva contraseña' });
+    const p2 = createFormField({ id: 'new-pw2', label: 'Confirmar contraseña', type: 'password', required: true, placeholder: 'Repita la contraseña' });
+    form.appendChild(p1.group);
+    form.appendChild(p2.group);
+    const btn = createButton('Guardar y continuar', 'primary', 'check', null, 'submit');
+    btn.classList.add('button--block');
+    form.appendChild(btn);
+
+    const linkCancel = document.createElement('a');
+    linkCancel.href = '#';
+    linkCancel.className = 'login-card__link text-body-sm';
+    linkCancel.textContent = 'Cancelar e iniciar sesión otra vez';
+    linkCancel.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        void (async () => {
+            try {
+                await PMOSupabase.getSupabase().auth.signOut();
+            } catch (e) {
+                console.warn(e);
+            }
+            if (typeof window !== 'undefined' && window.history && window.location) {
+                window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            }
+            navigateTo('login');
+        })();
+    });
+    const pCan = document.createElement('p');
+    pCan.className = 'login-card__register';
+    pCan.appendChild(linkCancel);
+    form.appendChild(pCan);
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const s1 = p1.input.value;
+        const s2 = p2.input.value;
+        if (s1.length < 6) {
+            showFieldError(p1.input, 'Mínimo 6 caracteres.');
+            return;
+        }
+        if (s1 !== s2) {
+            showFieldError(p2.input, 'Las contraseñas no coinciden.');
+            return;
+        }
+        void (async () => {
+            const { error } = await PMOSupabase.getSupabase().auth.updateUser({ password: s1 });
+            if (error) {
+                showNotification(formatAuthClientError(error), 'error');
+                return;
+            }
+            try {
+                if (typeof window !== 'undefined' && window.history && window.location) {
+                    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+                }
+                const profile = await PMOSupabase.fetchCurrentProfile();
+                const ok = await applyProfileAfterAuth(profile);
+                if (!ok) {
+                    return;
+                }
+                await refreshRequestsFromServer();
+                showNotification('Contraseña actualizada. Bienvenido.', 'success');
+                navigateToHome();
+            } catch (e) {
+                console.error(e);
+                showNotification('Contraseña actualizada. Inicie sesión con la nueva clave.', 'info');
+                navigateTo('login');
+            }
+        })();
+    });
+
+    card.appendChild(form);
+    main.appendChild(card);
+    root.appendChild(main);
 }
 
 /* -------------------------- Layout de Dashboard ------------------------- */
@@ -1372,15 +1921,18 @@ function createDashboardLayout(activeRoute) {
     let menuItems = [];
     if (role === ROLE_ADMIN) {
         menuItems = [
-            { id: 'dashboard_admin',   icon: 'dashboard',     text: 'Panel de Solicitudes' },
-            { id: 'flujo_gobierno',    icon: 'account_tree',  text: 'Flujo de Gobierno'    },
+            { id: 'dashboard_admin',  icon: 'dashboard',     text: 'Panel de Solicitudes' },
+            { id: 'flujo_gobierno',   icon: 'account_tree',  text: 'Flujo de Gobierno'    },
             { type: 'divider', label: 'Etapas' },
             { id: 'etapa_pmo',         icon: 'engineering',   text: 'Revisión PMO'         },
             { id: 'etapa_tecnica',     icon: 'balance',       text: 'Evaluación Financiera'},
             { id: 'etapa_director',    icon: 'verified_user', text: 'Aprobación'           },
             { id: 'etapa_aprobado',    icon: 'verified',      text: 'Aprobadas'            },
             { type: 'divider', label: 'Reportes' },
-            { id: 'metricas',          icon: 'analytics',     text: 'Métricas y Reportes'  }
+            { id: 'metricas',          icon: 'analytics',     text: 'Métricas y Reportes'  },
+            { id: 'admin_storage',     icon: 'hard_drive',    text: 'Storage'            },
+            { type: 'divider', label: 'Administración de usuarios' },
+            { id: 'admin_usuarios',   icon: 'group',         text: 'Usuarios y cuentas'   }
         ];
     } else if (role === ROLE_PM) {
         menuItems = [
@@ -1421,6 +1973,10 @@ function createDashboardLayout(activeRoute) {
     });
     sidebar.appendChild(nav);
 
+    const userBlock = createSidebarUserProfile(activeRoute);
+    userBlock.classList.add('sidebar__user');
+    sidebar.appendChild(userBlock);
+
     const sidebarFooter = document.createElement('div');
     sidebarFooter.className = 'sidebar__footer';
 
@@ -1450,6 +2006,9 @@ function createDashboardLayout(activeRoute) {
 
     const mobileActions = document.createElement('div');
     mobileActions.className = 'mobile-header__actions';
+    mobileActions.appendChild(createIconButton('person', 'Mi perfil', () => {
+        navigateTo('mi_perfil');
+    }));
     mobileActions.appendChild(createIconButton('logout', 'Cerrar sesión', logout));
     mobileHeader.appendChild(mobileActions);
 
@@ -1626,21 +2185,255 @@ function createRequestRow(req, includeApplicant) {
     return tr;
 }
 
+/* ----------------------------- Mi perfil ------------------------------- */
+
+function renderMiPerfil() {
+    if (!AppState.currentUser) {
+        navigateTo('landing');
+        return;
+    }
+    AppState.currentView = 'mi_perfil';
+    const canvas = createDashboardLayout('mi_perfil');
+
+    const loading = document.createElement('p');
+    loading.className = 'text-body-md';
+    loading.textContent = 'Cargando perfil...';
+    canvas.appendChild(loading);
+
+    void (async () => {
+        let profile;
+        try {
+            profile = await PMOSupabase.fetchCurrentProfile();
+        } catch (e) {
+            console.error(e);
+            while (canvas.firstChild) {
+                canvas.removeChild(canvas.firstChild);
+            }
+            const errP = document.createElement('p');
+            errP.className = 'form-error';
+            errP.textContent = 'No se pudo cargar el perfil. Compruebe su conexión e intente de nuevo.';
+            canvas.appendChild(errP);
+            return;
+        }
+        if (!profile) {
+            while (canvas.firstChild) {
+                canvas.removeChild(canvas.firstChild);
+            }
+            const errP2 = document.createElement('p');
+            errP2.className = 'form-error';
+            errP2.textContent = 'No se encontró el perfil.';
+            canvas.appendChild(errP2);
+            return;
+        }
+        AppState.currentUser.fullName = profile.fullName || '';
+
+        while (canvas.firstChild) {
+            canvas.removeChild(canvas.firstChild);
+        }
+
+        canvas.appendChild(
+            createPageHeader(
+                'Mi perfil',
+                'Resumen de su cuenta, datos de contacto y opciones de seguridad.'
+            )
+        );
+
+        const roleLabel = DB_ROLE_LABELS[profile.appRole] || profile.appRole;
+        const nameTrim = (profile.fullName && profile.fullName.trim()) ? profile.fullName.trim() : '';
+        const nameKpiValue = nameTrim
+            ? (nameTrim.length > 28 ? `${nameTrim.slice(0, 26)}…` : nameTrim)
+            : 'Sin definir';
+        const emailLocal = (profile.email && profile.email.includes('@'))
+            ? profile.email.split('@')[0]
+            : (profile.email || '—');
+        const emailKpiValue = emailLocal.length > 22 ? `${emailLocal.slice(0, 20)}…` : emailLocal;
+
+        const kpiGrid = document.createElement('div');
+        kpiGrid.className = 'mi-perfil__kpi-grid';
+        kpiGrid.appendChild(
+            createMetricaKPICard({
+                label: 'Rol en el portal',
+                value: roleLabel,
+                icon: 'badge',
+                sub: 'Permisos de acceso actuales',
+                color: '#6366f1'
+            })
+        );
+        kpiGrid.appendChild(
+            createMetricaKPICard({
+                label: 'Nombre visible',
+                value: nameKpiValue,
+                icon: 'person',
+                sub: 'Cómo se muestra en el portal',
+                color: '#10b981'
+            })
+        );
+        kpiGrid.appendChild(
+            createMetricaKPICard({
+                label: 'Correo (usuario)',
+                value: emailKpiValue,
+                icon: 'mail',
+                sub: profile.email,
+                color: '#0ea5e9'
+            })
+        );
+
+        const mainCol = document.createElement('div');
+        mainCol.className = 'mi-perfil';
+
+        const cardCuenta = _chartCard(
+            'Cuenta',
+            'Identificación, rol y avisos sobre solicitudes de permisos adicionales.'
+        );
+
+        const emailF = createFormField({
+            id: 'perfil-email',
+            label: 'Correo electrónico',
+            type: 'email',
+            value: profile.email
+        });
+        emailF.input.readOnly = true;
+        emailF.input.setAttribute('aria-readonly', 'true');
+        cardCuenta.appendChild(emailF.group);
+
+        const rolP = document.createElement('p');
+        rolP.className = 'perfil-cuenta__line';
+        const rolLabel = document.createElement('span');
+        rolLabel.className = 'perfil-cuenta__line-label text-label-caps';
+        rolLabel.textContent = 'Rol asignado';
+        const rolVal = document.createElement('span');
+        rolVal.className = 'perfil-cuenta__line-value';
+        rolVal.textContent = roleLabel;
+        rolP.appendChild(rolLabel);
+        rolP.appendChild(rolVal);
+        cardCuenta.appendChild(rolP);
+
+        if (
+            profile.requestedRole
+            && (profile.requestedRole === 'admin' || profile.requestedRole === 'project_manager')
+        ) {
+            const pending = document.createElement('p');
+            pending.className = 'perfil-cuenta__note';
+            pending.textContent = 'Solicitud de rol de '
+                + (DB_ROLE_LABELS[profile.requestedRole] || profile.requestedRole)
+                + ' pendiente de aprobación por un administrador.';
+            cardCuenta.appendChild(pending);
+        }
+        mainCol.appendChild(kpiGrid);
+        mainCol.appendChild(cardCuenta);
+
+        const cardNombre = _chartCard(
+            'Nombre para mostrar',
+            'Así se verá en comentarios, listas y al iniciar sesión (cuando el nombre esté guardado).'
+        );
+
+        const nameF = createFormField({
+            id: 'perfil-fullname',
+            label: 'Nombre y apellido (opcional)',
+            type: 'text',
+            placeholder: 'Cómo desea ser identificado en el portal',
+            value: profile.fullName || ''
+        });
+
+        const nameForm = document.createElement('form');
+        nameForm.className = 'perfil-cuenta__form';
+        nameForm.appendChild(nameF.group);
+        const nameActions = document.createElement('div');
+        nameActions.className = 'perfil-cuenta__actions';
+        const saveName = createButton('Guardar', 'primary', 'save', null, 'submit');
+        nameActions.appendChild(saveName);
+        nameForm.appendChild(nameActions);
+        nameForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const v = nameF.input.value.trim();
+            void (async () => {
+                clearFieldError(nameF.input);
+                const { error } = await PMOSupabase.updateMyFullName(v);
+                if (error) {
+                    showFieldError(nameF.input, error.message || 'No se pudo guardar el nombre.');
+                    return;
+                }
+                AppState.currentUser.fullName = v;
+                showNotification('Nombre actualizado correctamente.', 'success');
+                navigateTo('mi_perfil');
+            })();
+        });
+        cardNombre.appendChild(nameForm);
+        mainCol.appendChild(cardNombre);
+
+        const cardSeg = _chartCard(
+            'Seguridad',
+            'Cambie su contraseña de acceso al portal. Mínimo 6 caracteres.'
+        );
+
+        const p1 = createFormField({
+            id: 'perfil-pw1',
+            label: 'Nueva contraseña',
+            type: 'password',
+            required: true,
+            placeholder: 'Nueva contraseña'
+        });
+        const p2 = createFormField({
+            id: 'perfil-pw2',
+            label: 'Confirmar contraseña',
+            type: 'password',
+            required: true,
+            placeholder: 'Repita la contraseña'
+        });
+        const pwdForm = document.createElement('form');
+        pwdForm.className = 'perfil-cuenta__form';
+        pwdForm.appendChild(p1.group);
+        pwdForm.appendChild(p2.group);
+        const pwdActions = document.createElement('div');
+        pwdActions.className = 'perfil-cuenta__actions';
+        const savePwd = createButton('Actualizar contraseña', 'secondary', 'lock', null, 'submit');
+        pwdActions.appendChild(savePwd);
+        pwdForm.appendChild(pwdActions);
+        pwdForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const s1 = p1.input.value;
+            const s2 = p2.input.value;
+            if (s1.length < 6) {
+                showFieldError(p1.input, 'Mínimo 6 caracteres.');
+                return;
+            }
+            if (s1 !== s2) {
+                showFieldError(p2.input, 'Las contraseñas no coinciden.');
+                return;
+            }
+            void (async () => {
+                clearFieldError(p1.input);
+                clearFieldError(p2.input);
+                const { error } = await PMOSupabase.getSupabase().auth.updateUser({ password: s1 });
+                if (error) {
+                    showFieldError(p1.input, formatAuthClientError(error));
+                    return;
+                }
+                p1.input.value = '';
+                p2.input.value = '';
+                showNotification('Contraseña actualizada correctamente.', 'success');
+            })();
+        });
+        cardSeg.appendChild(pwdForm);
+        mainCol.appendChild(cardSeg);
+
+        canvas.appendChild(mainCol);
+    })();
+}
+
 /* -------------------- Dashboard del Solicitante ------------------------- */
 
 function renderDashboardSolicitante() {
     AppState.currentView = 'dashboard_solicitante';
     const canvas = createDashboardLayout('dashboard_solicitante');
 
-    const emailPrefix = AppState.currentUser?.email
-        ? AppState.currentUser.email.split('@')[0]
-        : 'Usuario';
+    const displayName = getUserDisplayName(AppState.currentUser);
 
     const newReqBtn = createButton('Nueva Solicitud', 'primary', 'add_circle',
         () => navigateTo('nueva_solicitud'));
 
     canvas.appendChild(createPageHeader(
-        `Hola, ${emailPrefix}`,
+        `Hola, ${displayName}`,
         'Resumen de sus solicitudes de proyecto',
         newReqBtn
     ));
@@ -1916,7 +2709,7 @@ function renderNuevaSolicitud(draftId) {
 
     const btnDraft = createButton('Guardar Borrador', 'secondary', 'save', (event) => {
         event.preventDefault();
-        saveDraft();
+        void saveDraft();
     });
     actions.appendChild(btnDraft);
 
@@ -1925,7 +2718,7 @@ function renderNuevaSolicitud(draftId) {
 
     form.appendChild(actions);
 
-    function saveDraft() {
+    async function saveDraft() {
         const titleValue = fieldTitulo.input.value.trim();
         if (!titleValue || titleValue.length < 3) {
             showFieldError(fieldTitulo.input, 'Ingrese un título de al menos 3 caracteres para guardar el borrador.');
@@ -1944,30 +2737,33 @@ function renderNuevaSolicitud(draftId) {
             necesidad: fieldNecesidad.input.value.trim(),
             impacto: fieldImpacto.input.value.trim(),
             presupuestoEstimado: fieldPresupuesto.input.value || '0',
-            fechaEstimadaInicio: fieldFecha.input.value || ''
+            fechaEstimadaInicio: fieldFecha.input.value || '',
+            comments: existingDraft && existingDraft.comments ? existingDraft.comments : []
         };
 
-        if (existingDraft) {
-            const index = AppState.requests.findIndex((r) => r.id === existingDraft.id);
-            if (index !== -1) {
-                AppState.requests[index] = { ...AppState.requests[index], ...draftData };
+        try {
+            if (existingDraft) {
+                const index = AppState.requests.findIndex((r) => r.id === existingDraft.id);
+                if (index !== -1) {
+                    const updated = { ...AppState.requests[index], ...draftData, applicantId: AppState.currentUser.id };
+                    AppState.requests[index] = updated;
+                    await persistRequestUpdate(updated);
+                }
+                showNotification(`Borrador ${formatRequestId(existingDraft.id)} actualizado correctamente.`, 'success');
+            } else {
+                const newDraft = {
+                    date: new Date().toISOString().split('T')[0],
+                    comments: [],
+                    ...draftData,
+                    applicantId: AppState.currentUser.id
+                };
+                const created = await PMOData.insertRequest(newDraft, AppState.currentUser.id);
+                showNotification(`Borrador ${formatRequestId(created.id)} guardado correctamente.`, 'success');
             }
-            saveState();
-            showNotification(`Borrador ${formatRequestId(existingDraft.id)} actualizado correctamente.`, 'success');
-        } else {
-            const maxId = AppState.requests.reduce((max, r) => Math.max(max, r.id), 0);
-            const newDraft = {
-                id: maxId + 1,
-                date: new Date().toISOString().split('T')[0],
-                comments: [],
-                ...draftData
-            };
-            AppState.requests.push(newDraft);
-            saveState();
-            showNotification(`Borrador ${formatRequestId(newDraft.id)} guardado correctamente.`, 'success');
+            navigateTo('dashboard_solicitante');
+        } catch (e) {
+            /* persistRequestUpdate / insertRequest ya notifican */
         }
-
-        navigateTo('dashboard_solicitante');
     }
 
     form.addEventListener('submit', (event) => {
@@ -2003,49 +2799,55 @@ function renderNuevaSolicitud(draftId) {
             return;
         }
 
-        if (existingDraft) {
-            const index = AppState.requests.findIndex((r) => r.id === existingDraft.id);
-            if (index !== -1) {
-                AppState.requests[index] = {
-                    ...AppState.requests[index],
-                    title: fieldTitulo.input.value.trim(),
-                    status: STATUS.PENDING,
-                    stage: STAGE.PMO,
-                    area: fieldArea.input.value,
-                    prioridad: fieldPrioridad.input.value,
-                    tipoProyecto: fieldTipo.input.value,
-                    necesidad: fieldNecesidad.input.value.trim(),
-                    impacto: fieldImpacto.input.value.trim(),
-                    presupuestoEstimado: fieldPresupuesto.input.value,
-                    fechaEstimadaInicio: fieldFecha.input.value
-                };
+        void (async () => {
+            try {
+                if (existingDraft) {
+                    const index = AppState.requests.findIndex((r) => r.id === existingDraft.id);
+                    if (index !== -1) {
+                        const next = {
+                            ...AppState.requests[index],
+                            title: fieldTitulo.input.value.trim(),
+                            status: STATUS.PENDING,
+                            stage: STAGE.PMO,
+                            area: fieldArea.input.value,
+                            prioridad: fieldPrioridad.input.value,
+                            tipoProyecto: fieldTipo.input.value,
+                            necesidad: fieldNecesidad.input.value.trim(),
+                            impacto: fieldImpacto.input.value.trim(),
+                            presupuestoEstimado: fieldPresupuesto.input.value,
+                            fechaEstimadaInicio: fieldFecha.input.value,
+                            applicant: AppState.currentUser.email,
+                            applicantId: AppState.currentUser.id
+                        };
+                        AppState.requests[index] = next;
+                        await persistRequestUpdate(next);
+                    }
+                    showNotification(`Solicitud ${formatRequestId(existingDraft.id)} enviada correctamente.`, 'success');
+                } else {
+                    const newRequest = {
+                        title: fieldTitulo.input.value.trim(),
+                        status: STATUS.PENDING,
+                        stage: STAGE.PMO,
+                        date: new Date().toISOString().split('T')[0],
+                        applicant: AppState.currentUser.email,
+                        area: fieldArea.input.value,
+                        prioridad: fieldPrioridad.input.value,
+                        tipoProyecto: fieldTipo.input.value,
+                        necesidad: fieldNecesidad.input.value.trim(),
+                        impacto: fieldImpacto.input.value.trim(),
+                        presupuestoEstimado: fieldPresupuesto.input.value,
+                        fechaEstimadaInicio: fieldFecha.input.value,
+                        comments: [],
+                        applicantId: AppState.currentUser.id
+                    };
+                    const created = await PMOData.insertRequest(newRequest, AppState.currentUser.id);
+                    showNotification(`Solicitud ${formatRequestId(created.id)} enviada correctamente.`, 'success');
+                }
+                navigateTo('dashboard_solicitante');
+            } catch (e) {
+                /* persistRequestUpdate / insertRequest ya notifican */
             }
-            saveState();
-            showNotification(`Solicitud ${formatRequestId(existingDraft.id)} enviada correctamente.`, 'success');
-        } else {
-            const maxId = AppState.requests.reduce((max, r) => Math.max(max, r.id), 0);
-            const newRequest = {
-                id: maxId + 1,
-                title: fieldTitulo.input.value.trim(),
-                status: STATUS.PENDING,
-                stage: STAGE.PMO,
-                date: new Date().toISOString().split('T')[0],
-                applicant: AppState.currentUser.email,
-                area: fieldArea.input.value,
-                prioridad: fieldPrioridad.input.value,
-                tipoProyecto: fieldTipo.input.value,
-                necesidad: fieldNecesidad.input.value.trim(),
-                impacto: fieldImpacto.input.value.trim(),
-                presupuestoEstimado: fieldPresupuesto.input.value,
-                fechaEstimadaInicio: fieldFecha.input.value,
-                comments: []
-            };
-            AppState.requests.push(newRequest);
-            saveState();
-            showNotification(`Solicitud ${formatRequestId(newRequest.id)} enviada correctamente.`, 'success');
-        }
-
-        navigateTo('dashboard_solicitante');
+        })();
     });
 
     formWrapper.appendChild(form);
@@ -2357,35 +3159,37 @@ function createAjustesLayout(req) {
         const returnStage = req.stage || STAGE.PMO;
         const returnStageLabel = STAGE_LABELS[returnStage] || 'Revisión PMO';
 
-        const index = AppState.requests.findIndex((r) => r.id === req.id);
-        if (index !== -1) {
-            AppState.requests[index] = {
-                ...AppState.requests[index],
-                title: fieldTitulo.input.value.trim(),
-                status: STATUS.PENDING,
-                stage: returnStage,
-                area: fieldArea.input.value,
-                prioridad: fieldPrioridad.input.value,
-                tipoProyecto: fieldTipo.input.value,
-                necesidad: fieldNecesidad.input.value.trim(),
-                impacto: fieldImpacto.input.value.trim(),
-                presupuestoEstimado: fieldPresupuesto.input.value,
-                fechaEstimadaInicio: fieldFecha.input.value
-            };
-
-            if (!AppState.requests[index].comments) {
-                AppState.requests[index].comments = [];
+        void (async () => {
+            try {
+                const index = AppState.requests.findIndex((r) => r.id === req.id);
+                if (index === -1) {
+                    return;
+                }
+                const next = {
+                    ...AppState.requests[index],
+                    title: fieldTitulo.input.value.trim(),
+                    status: STATUS.PENDING,
+                    stage: returnStage,
+                    area: fieldArea.input.value,
+                    prioridad: fieldPrioridad.input.value,
+                    tipoProyecto: fieldTipo.input.value,
+                    necesidad: fieldNecesidad.input.value.trim(),
+                    impacto: fieldImpacto.input.value.trim(),
+                    presupuestoEstimado: fieldPresupuesto.input.value,
+                    fechaEstimadaInicio: fieldFecha.input.value
+                };
+                AppState.requests[index] = next;
+                await addCommentToRequest(
+                    next,
+                    `Solicitud ajustada y reenviada a ${returnStageLabel} por el solicitante.`
+                );
+                await persistRequestUpdate(next);
+                showNotification(`Solicitud reenviada a ${returnStageLabel}. El administrador podrá evaluarla nuevamente.`, 'success');
+                navigateTo('dashboard_solicitante');
+            } catch (e) {
+                /* addCommentToRequest / persist ya notifican */
             }
-            AppState.requests[index].comments.push({
-                author: AppState.currentUser.email,
-                date: new Date().toISOString().split('T')[0],
-                text: `Solicitud ajustada y reenviada a ${returnStageLabel} por el solicitante.`
-            });
-        }
-
-        saveState();
-        showNotification(`Solicitud reenviada a ${returnStageLabel}. El administrador podrá evaluarla nuevamente.`, 'success');
-        navigateTo('dashboard_solicitante');
+        })();
     });
 
     formCard.appendChild(form);
@@ -3005,15 +3809,6 @@ function createDecisionesActionArea(req) {
 
     const getComment = () => commentField.input.value.trim();
 
-    const addComment = (text) => {
-        if (!req.comments) req.comments = [];
-        req.comments.push({
-            author: AppState.currentUser.email,
-            date: new Date().toISOString().split('T')[0],
-            text
-        });
-    };
-
     const buttons = document.createElement('div');
     buttons.className = 'decisions-action__buttons';
 
@@ -3021,12 +3816,18 @@ function createDecisionesActionArea(req) {
         const nextStage = STAGE_ORDER[STAGE_ORDER.indexOf(currentStage) + 1];
         const advanceLabel = `Aprobar Fase ${STAGE_LABELS[currentStage]}`;
         const advanceBtn = createButton(advanceLabel, 'primary', 'thumb_up', () => {
-            const comment = getComment();
-            addComment(comment || `La solicitud avanzó a la etapa "${STAGE_LABELS[nextStage]}".`);
-            req.stage = nextStage;
-            saveState();
-            showNotification(`Solicitud avanzada a ${STAGE_LABELS[nextStage]}.`, 'success');
-            renderDetalleSolicitud(req.id);
+            void (async () => {
+                try {
+                    const comment = getComment() || `La solicitud avanzó a la etapa "${STAGE_LABELS[nextStage]}".`;
+                    await addCommentToRequest(req, comment);
+                    req.stage = nextStage;
+                    await persistRequestUpdate(req);
+                    showNotification(`Solicitud avanzada a ${STAGE_LABELS[nextStage]}.`, 'success');
+                    renderDetalleSolicitud(req.id);
+                } catch (e) {
+                    /* notificado */
+                }
+            })();
         });
         advanceBtn.classList.add('button--block');
         buttons.appendChild(advanceBtn);
@@ -3034,12 +3835,18 @@ function createDecisionesActionArea(req) {
 
     if (isLastStage && req.status === STATUS.PENDING) {
         const finalApproveBtn = createButton('Aprobar Solicitud', 'primary', 'task_alt', () => {
-            const comment = getComment();
-            addComment(comment || 'Solicitud aprobada por el director.');
-            req.status = STATUS.APPROVED;
-            saveState();
-            showNotification('Solicitud aprobada correctamente.', 'success');
-            renderDetalleSolicitud(req.id);
+            void (async () => {
+                try {
+                    const comment = getComment() || 'Solicitud aprobada por el director.';
+                    await addCommentToRequest(req, comment);
+                    req.status = STATUS.APPROVED;
+                    await persistRequestUpdate(req);
+                    showNotification('Solicitud aprobada correctamente.', 'success');
+                    renderDetalleSolicitud(req.id);
+                } catch (e) {
+                    /* notificado */
+                }
+            })();
         });
         finalApproveBtn.classList.add('button--block');
         buttons.appendChild(finalApproveBtn);
@@ -3051,11 +3858,17 @@ function createDecisionesActionArea(req) {
             showFieldError(commentField.input, 'Agrega un comentario indicando los ajustes requeridos.');
             return;
         }
-        addComment(comment);
-        req.status = STATUS.CHANGES;
-        saveState();
-        showNotification('Se solicitaron ajustes al solicitante.', 'info');
-        renderDetalleSolicitud(req.id);
+        void (async () => {
+            try {
+                await addCommentToRequest(req, comment);
+                req.status = STATUS.CHANGES;
+                await persistRequestUpdate(req);
+                showNotification('Se solicitaron ajustes al solicitante.', 'info');
+                renderDetalleSolicitud(req.id);
+            } catch (e) {
+                /* notificado */
+            }
+        })();
     });
     buttons.appendChild(changesBtn);
 
@@ -3065,11 +3878,17 @@ function createDecisionesActionArea(req) {
             showFieldError(commentField.input, 'Agrega un comentario justificando el rechazo.');
             return;
         }
-        addComment(comment);
-        req.status = STATUS.REJECTED;
-        saveState();
-        showNotification('La solicitud fue rechazada.', 'error');
-        renderDetalleSolicitud(req.id);
+        void (async () => {
+            try {
+                await addCommentToRequest(req, comment);
+                req.status = STATUS.REJECTED;
+                await persistRequestUpdate(req);
+                showNotification('La solicitud fue rechazada.', 'error');
+                renderDetalleSolicitud(req.id);
+            } catch (e) {
+                /* notificado */
+            }
+        })();
     });
     buttons.appendChild(rejectBtn);
 
@@ -3084,17 +3903,18 @@ function createDecisionesActionArea(req) {
         backLink.className = 'decisions-action__link';
         backLink.textContent = `← Regresar a ${STAGE_LABELS[prevStage]}`;
         backLink.addEventListener('click', () => {
-            const comment = getComment();
-            if (!req.comments) req.comments = [];
-            req.comments.push({
-                author: AppState.currentUser.email,
-                date: new Date().toISOString().split('T')[0],
-                text: comment || `La solicitud fue regresada a la etapa "${STAGE_LABELS[prevStage]}".`
-            });
-            req.stage = prevStage;
-            saveState();
-            showNotification(`Solicitud regresada a ${STAGE_LABELS[prevStage]}.`, 'info');
-            renderDetalleSolicitud(req.id);
+            void (async () => {
+                try {
+                    const comment = getComment() || `La solicitud fue regresada a la etapa "${STAGE_LABELS[prevStage]}".`;
+                    await addCommentToRequest(req, comment);
+                    req.stage = prevStage;
+                    await persistRequestUpdate(req);
+                    showNotification(`Solicitud regresada a ${STAGE_LABELS[prevStage]}.`, 'info');
+                    renderDetalleSolicitud(req.id);
+                } catch (e) {
+                    /* notificado */
+                }
+            })();
         });
         backInfo.appendChild(backLink);
         wrapper.appendChild(backInfo);
@@ -3183,19 +4003,19 @@ function createReopenFooter(req) {
             return;
         }
 
-        if (!req.comments) req.comments = [];
-        req.comments.push({
-            author: AppState.currentUser.email,
-            date: new Date().toISOString().split('T')[0],
-            text: `Solicitud reabierta y enviada a "${STAGE_LABELS[targetStage]}". Motivo: ${comment}`
-        });
-
-        req.status = STATUS.PENDING;
-        req.stage  = targetStage;
-
-        saveState();
-        showNotification(`Solicitud reabierta en etapa "${STAGE_LABELS[targetStage]}".`, 'success');
-        renderDetalleSolicitud(req.id);
+        void (async () => {
+            try {
+                const msg = `Solicitud reabierta y enviada a "${STAGE_LABELS[targetStage]}". Motivo: ${comment}`;
+                await addCommentToRequest(req, msg);
+                req.status = STATUS.PENDING;
+                req.stage = targetStage;
+                await persistRequestUpdate(req);
+                showNotification(`Solicitud reabierta en etapa "${STAGE_LABELS[targetStage]}".`, 'success');
+                renderDetalleSolicitud(req.id);
+            } catch (e) {
+                /* notificado */
+            }
+        })();
     });
     reopenBtn.classList.add('button--block');
     wrapper.appendChild(reopenBtn);
@@ -3362,16 +4182,16 @@ function createComentariosCard(req) {
             return;
         }
 
-        if (!req.comments) req.comments = [];
-        req.comments.push({
-            author: AppState.currentUser.email,
-            date: new Date().toISOString().split('T')[0],
-            text
-        });
-        saveState();
-        textareaField.input.value = '';
-        renderComments();
-        showNotification('Comentario publicado correctamente.', 'success');
+        void (async () => {
+            try {
+                await addCommentToRequest(req, text);
+                textareaField.input.value = '';
+                renderComments();
+                showNotification('Comentario publicado correctamente.', 'success');
+            } catch (e) {
+                /* notificado */
+            }
+        })();
     });
 
     card.appendChild(form);
@@ -3396,6 +4216,192 @@ function renderDashboardAdmin() {
 
     canvas.appendChild(createPortfolioKpis());
     canvas.appendChild(createPortfolioTable());
+}
+
+/* ------------------ Administración de usuarios (solo admin) ------------------ */
+
+function renderAdminUsuarios() {
+    if (AppState.currentUser?.role !== ROLE_ADMIN) {
+        showNotification('Solo los administradores pueden acceder a esta sección.', 'error');
+        navigateToHome();
+        return;
+    }
+
+    AppState.currentView = 'admin_usuarios';
+    const canvas = createDashboardLayout('admin_usuarios');
+
+    canvas.appendChild(
+        createPageHeader(
+            'Usuarios y cuentas',
+            'Desactive o reactive cuentas. Apruebe o rechace solicitudes de rol de administrador o project manager.'
+        )
+    );
+
+    const kpiGrid = document.createElement('div');
+    kpiGrid.className = 'admin-users__kpi-grid';
+    const kpiValueByKey = {};
+    [
+        { key: 'total', label: 'Total de cuentas', value: '0', icon: 'group', sub: 'Usuarios en el directorio', color: '#6366f1' },
+        { key: 'active', label: 'Cuentas activas', value: '0', icon: 'check_circle', sub: 'Con acceso al sistema', color: '#10b981' },
+        { key: 'inactive', label: 'Cuentas inactivas', value: '0', icon: 'block', sub: 'Sin acceso', color: '#f59e0b' },
+        { key: 'pending', label: 'Solicitudes de rol', value: '0', icon: 'pending_actions', sub: 'Pendiente de aprobación', color: '#8b5cf6' }
+    ].forEach((c) => {
+        const { key, ...kpi } = c;
+        const card = createMetricaKPICard(kpi);
+        kpiValueByKey[key] = card.querySelector('.metricas-kpi-card__value');
+        kpiGrid.appendChild(card);
+    });
+    canvas.appendChild(kpiGrid);
+
+    const accountsCard = _chartCard(
+        'Cuentas registradas',
+        'Listado alfabético por correo. Use las acciones de cada fila según la política de la organización.'
+    );
+
+    const tableWrap = document.createElement('div');
+    tableWrap.className = 'table-container admin-users__scroll';
+    const table = document.createElement('table');
+    table.className = 'metricas-top-table admin-users__table';
+    const thead = document.createElement('thead');
+    const hr = document.createElement('tr');
+    ['Correo', 'Rol actual', 'Solicitud pendiente', 'Activa', 'Acciones'].forEach((h) => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        hr.appendChild(th);
+    });
+    thead.appendChild(hr);
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    table.appendChild(tbody);
+    tableWrap.appendChild(table);
+    accountsCard.appendChild(tableWrap);
+    canvas.appendChild(accountsCard);
+
+    const myId = AppState.currentUser.id;
+
+    async function loadRows() {
+        tbody.replaceChildren();
+        let list;
+        try {
+            list = await PMOData.fetchAllProfiles();
+        } catch (e) {
+            console.error(e);
+            showNotification('No se pudo cargar el listado de usuarios. ¿Aplicó la migración 003 en Supabase?', 'error');
+            return;
+        }
+        kpiValueByKey.total.textContent = String(list.length);
+        kpiValueByKey.active.textContent = String(list.filter((r) => r.is_active).length);
+        kpiValueByKey.inactive.textContent = String(list.filter((r) => !r.is_active).length);
+        kpiValueByKey.pending.textContent = String(list.filter((r) => r.requested_role).length);
+        list.forEach((row) => {
+            const tr = document.createElement('tr');
+
+            const tdEmail = document.createElement('td');
+            tdEmail.className = 'admin-users__cell-email';
+            tdEmail.textContent = row.email;
+            tr.appendChild(tdEmail);
+
+            const tdRol = document.createElement('td');
+            const rolSpan = document.createElement('span');
+            rolSpan.className = 'admin-users__role-pill text-body-sm';
+            rolSpan.textContent = DB_ROLE_LABELS[row.role] || row.role;
+            tdRol.appendChild(rolSpan);
+            tr.appendChild(tdRol);
+
+            const tdSol = document.createElement('td');
+            if (row.requested_role) {
+                const b = document.createElement('span');
+                b.className = 'admin-users__badge-pending text-body-sm';
+                b.textContent = DB_ROLE_LABELS[row.requested_role] || row.requested_role;
+                tdSol.appendChild(b);
+            } else {
+                tdSol.textContent = '—';
+            }
+            tr.appendChild(tdSol);
+
+            const tdAct = document.createElement('td');
+            const activeLabel = document.createElement('span');
+            activeLabel.className = row.is_active
+                ? 'admin-users__status admin-users__status--on text-body-sm'
+                : 'admin-users__status admin-users__status--off text-body-sm';
+            activeLabel.textContent = row.is_active ? 'Activa' : 'Inactiva';
+            tdAct.appendChild(activeLabel);
+            tr.appendChild(tdAct);
+
+            const tdActBtn = document.createElement('td');
+            tdActBtn.className = 'admin-users__actions';
+
+            if (row.id === myId) {
+                const note = document.createElement('span');
+                note.className = 'text-body-sm admin-users__self-note';
+                note.textContent = 'Su propia cuenta (use otro admin para desactivarla)';
+                tdActBtn.appendChild(note);
+            } else {
+                const tBtn = createButton(
+                    row.is_active ? 'Desactivar' : 'Activar',
+                    row.is_active ? 'secondary' : 'primary',
+                    row.is_active ? 'block' : 'check_circle',
+                    () => {
+                        void (async () => {
+                            try {
+                                await PMOData.updateProfileAsAdmin(row.id, { is_active: !row.is_active });
+                                showNotification('Usuario actualizado.', 'success');
+                                await loadRows();
+                            } catch (e) {
+                                console.error(e);
+                                showNotification('No se pudo actualizar el usuario.', 'error');
+                            }
+                        })();
+                    }
+                );
+                tBtn.type = 'button';
+                tBtn.classList.add('button--sm');
+                tdActBtn.appendChild(tBtn);
+            }
+
+            if (row.requested_role) {
+                const apBtn = createButton('Aprobar rol', 'primary', 'verified', () => {
+                    void (async () => {
+                        try {
+                            await PMOData.updateProfileAsAdmin(row.id, {
+                                role: row.requested_role,
+                                requested_role: null
+                            });
+                            showNotification('Rol asignado correctamente.', 'success');
+                            await loadRows();
+                        } catch (e) {
+                            console.error(e);
+                            showNotification('No se pudo aprobar la solicitud.', 'error');
+                        }
+                    })();
+                });
+                apBtn.type = 'button';
+                apBtn.classList.add('button--sm', 'admin-users__action-gap');
+                tdActBtn.appendChild(apBtn);
+
+                const rjBtn = createButton('Rechazar', 'secondary', 'close', () => {
+                    void (async () => {
+                        try {
+                            await PMOData.updateProfileAsAdmin(row.id, { requested_role: null });
+                            showNotification('Solicitud de rol rechazada.', 'info');
+                            await loadRows();
+                        } catch (e) {
+                            console.error(e);
+                            showNotification('No se pudo actualizar la solicitud.', 'error');
+                        }
+                    })();
+                });
+                rjBtn.type = 'button';
+                rjBtn.classList.add('button--sm', 'admin-users__action-gap');
+                tdActBtn.appendChild(rjBtn);
+            }
+
+            tr.appendChild(tdActBtn);
+            tbody.appendChild(tr);
+        });
+    }
+
+    void loadRows();
 }
 
 /* ============================================================ */
@@ -4597,606 +5603,21 @@ function formatBudgetShort(value) {
     return formatCurrency(num);
 }
 
-function __placeholder__panelRemoved__start() {
-    const sortByDate = (arr) => [...arr].sort((a, b) => b.date.localeCompare(a.date));
-
-    const pmoReqs      = sortByDate(AppState.requests.filter((r) => r.status === STATUS.PENDING && (r.stage || STAGE.PMO) === STAGE.PMO));
-    const tecnicaReqs  = sortByDate(AppState.requests.filter((r) => r.status === STATUS.PENDING && r.stage === STAGE.TECNICA));
-    const directorReqs = sortByDate(AppState.requests.filter((r) => r.status === STATUS.PENDING && r.stage === STAGE.DIRECTOR));
-    const approvedReqs = sortByDate(AppState.requests.filter((r) => r.status === STATUS.APPROVED));
-
-    const allReviewable = [...pmoReqs, ...tecnicaReqs, ...directorReqs, ...approvedReqs];
-    const totalPending  = pmoReqs.length + tecnicaReqs.length + directorReqs.length;
-
-    let currentSelectedId = selectedId !== undefined && selectedId !== null
-        ? parseInt(selectedId, 10)
-        : null;
-
-    if (currentSelectedId === null || !allReviewable.find((r) => r.id === currentSelectedId)) {
-        currentSelectedId = allReviewable.length > 0 ? allReviewable[0].id : null;
+/** Abre un adjunto de implementación almacenado en Supabase Storage (URL firmada). */
+function openImplementationDocument(uploaded) {
+    if (!uploaded || !uploaded.storagePath) {
+        showNotification('Este documento no tiene archivo en almacenamiento.', 'info');
+        return;
     }
-
-    const panel = document.createElement('div');
-    panel.className = 'review-panel';
-
-    /* ---- Columna izquierda: lista agrupada por etapa ---- */
-    const listSection = document.createElement('section');
-    listSection.className = 'review-list';
-
-    const listHeader = document.createElement('div');
-    listHeader.className = 'review-list__header';
-    const listTitles = document.createElement('div');
-    const listTitle = document.createElement('h1');
-    listTitle.className = 'review-list__title';
-    listTitle.textContent = 'Panel de Aprobaciones';
-    listTitles.appendChild(listTitle);
-    const listSubtitle = document.createElement('p');
-    listSubtitle.className = 'review-list__subtitle';
-    listSubtitle.textContent = totalPending === 0
-        ? 'Sin solicitudes pendientes de decisión'
-        : `${totalPending} solicitud(es) pendiente(s) de decisión`;
-    listTitles.appendChild(listSubtitle);
-    listHeader.appendChild(listTitles);
-    listSection.appendChild(listHeader);
-
-    const stageGroups = [
-        { label: STAGE_LABELS[STAGE.PMO],      icon: 'engineering',   reqs: pmoReqs      },
-        { label: STAGE_LABELS[STAGE.TECNICA],  icon: 'balance',       reqs: tecnicaReqs  },
-        { label: STAGE_LABELS[STAGE.DIRECTOR], icon: 'verified_user', reqs: directorReqs },
-        { label: 'Aprobadas',                  icon: 'verified',      reqs: approvedReqs }
-    ];
-
-    stageGroups.forEach(({ label, icon, reqs }) => {
-        listSection.appendChild(
-            createReviewStageGroup(label, icon, reqs, currentSelectedId)
-        );
-    });
-
-    panel.appendChild(listSection);
-
-    /* ---- Columna derecha: preview de la solicitud seleccionada ---- */
-    const previewSection = document.createElement('section');
-    previewSection.className = 'review-preview';
-
-    const selectedRequest = allReviewable.find((r) => r.id === currentSelectedId);
-
-    if (!selectedRequest) {
-        const empty = document.createElement('div');
-        empty.className = 'review-preview__empty';
-        empty.appendChild(createIcon('task_alt'));
-        const emptyTitle = document.createElement('p');
-        emptyTitle.className = 'review-preview__empty-title';
-        emptyTitle.textContent = '¡Todo al día!';
-        empty.appendChild(emptyTitle);
-        const emptyText = document.createElement('p');
-        emptyText.className = 'text-body-sm';
-        emptyText.textContent = 'No hay solicitudes que revisar por el momento.';
-        empty.appendChild(emptyText);
-        previewSection.appendChild(empty);
-    } else {
-        previewSection.appendChild(createReviewPreviewHeader(selectedRequest));
-        previewSection.appendChild(createReviewPreviewBody(selectedRequest));
-        if (selectedRequest.status === STATUS.APPROVED) {
-            previewSection.appendChild(createReviewReadOnlyFooter());
-        } else {
-            previewSection.appendChild(createReviewActionsFooter(selectedRequest));
+    void (async () => {
+        try {
+            const url = await PMOData.getSignedFileUrl(uploaded.storagePath);
+            window.open(url, '_blank', 'noopener,noreferrer');
+        } catch (err) {
+            console.error(err);
+            showNotification(err.message || 'No se pudo abrir el documento.', 'error');
         }
-    }
-
-    panel.appendChild(previewSection);
-    canvas.appendChild(panel);
-}
-
-function createReviewStageGroup(label, icon, reqs, currentSelectedId) {
-    const group = document.createElement('div');
-    group.className = 'review-stage-group';
-
-    const header = document.createElement('div');
-    header.className = 'review-stage-header';
-    header.appendChild(createIcon(icon));
-
-    const labelEl = document.createElement('span');
-    labelEl.className = 'review-stage-header__label';
-    labelEl.textContent = label;
-    header.appendChild(labelEl);
-
-    const countEl = document.createElement('span');
-    countEl.className = 'review-stage-header__count';
-    countEl.textContent = String(reqs.length);
-    header.appendChild(countEl);
-
-    group.appendChild(header);
-
-    if (reqs.length === 0) {
-        const empty = document.createElement('p');
-        empty.className = 'review-stage-empty';
-        empty.textContent = 'Sin solicitudes en esta etapa';
-        group.appendChild(empty);
-    } else {
-        reqs.forEach((req) => {
-            group.appendChild(createReviewListItem(req, req.id === currentSelectedId));
-        });
-    }
-
-    return group;
-}
-
-function createReviewListItem(req, isActive) {
-    const item = document.createElement('button');
-    item.type = 'button';
-    item.className = 'review-item';
-    if (isActive) item.classList.add('review-item--active');
-
-    const top = document.createElement('div');
-    top.className = 'review-item__top';
-
-    const idChip = document.createElement('span');
-    idChip.className = 'review-item__id';
-    idChip.textContent = formatRequestId(req.id);
-    top.appendChild(idChip);
-
-    top.appendChild(getPriorityBadge(req.prioridad));
-    item.appendChild(top);
-
-    const title = document.createElement('h3');
-    title.className = 'review-item__title';
-    title.textContent = req.title;
-    item.appendChild(title);
-
-    const description = document.createElement('p');
-    description.className = 'review-item__description';
-    description.textContent = req.necesidad || 'Sin descripción registrada.';
-    item.appendChild(description);
-
-    const footer = document.createElement('div');
-    footer.className = 'review-item__footer';
-
-    const dateEl = document.createElement('span');
-    dateEl.className = 'review-item__date';
-    dateEl.appendChild(createIcon('schedule'));
-    const dateText = document.createElement('span');
-    dateText.textContent = formatRelativeDate(req.date);
-    dateEl.appendChild(dateText);
-    footer.appendChild(dateEl);
-
-    const budget = document.createElement('span');
-    budget.className = 'review-item__budget';
-    budget.textContent = formatBudgetShort(req.presupuestoEstimado);
-    footer.appendChild(budget);
-
-    item.appendChild(footer);
-
-    item.addEventListener('click', () => renderPanelAprobacion(req.id));
-    return item;
-}
-
-function createReviewPreviewHeader(req) {
-    const header = document.createElement('header');
-    header.className = 'review-preview__header';
-
-    const topline = document.createElement('div');
-    topline.className = 'review-preview__topline';
-
-    const titles = document.createElement('div');
-
-    const meta = document.createElement('div');
-    meta.className = 'review-preview__meta';
-
-    const idChip = document.createElement('span');
-    idChip.className = 'review-preview__meta-chip';
-    idChip.textContent = formatRequestId(req.id);
-    meta.appendChild(idChip);
-
-    const sponsor = document.createElement('span');
-    sponsor.className = 'review-preview__sponsor';
-    sponsor.appendChild(createIcon('account_circle'));
-    const sponsorText = document.createElement('span');
-    sponsorText.textContent = `Solicitante: ${req.applicant}`;
-    sponsor.appendChild(sponsorText);
-    meta.appendChild(sponsor);
-
-    titles.appendChild(meta);
-
-    const title = document.createElement('h2');
-    title.className = 'review-preview__title';
-    title.textContent = req.title;
-    titles.appendChild(title);
-
-    topline.appendChild(titles);
-
-    const actions = document.createElement('div');
-    const detailBtn = createIconButton('open_in_new', 'Ver detalle completo', () => {
-        navigateTo('detalle_solicitud', req.id);
-    });
-    actions.appendChild(detailBtn);
-    topline.appendChild(actions);
-
-    header.appendChild(topline);
-
-    const stats = document.createElement('div');
-    stats.className = 'review-preview__stats';
-
-    stats.appendChild(createReviewStat(
-        'Presupuesto Est.',
-        formatCurrency(req.presupuestoEstimado)
-    ));
-    stats.appendChild(createReviewStat(
-        'Inicio Estimado',
-        formatDate(req.fechaEstimadaInicio)
-    ));
-    stats.appendChild(createReviewStat(
-        'Nivel de Riesgo',
-        getRiskLabel(req.prioridad),
-        getRiskIcon(req.prioridad),
-        getRiskValueClass(req.prioridad)
-    ));
-    stats.appendChild(createReviewStat(
-        'Tipo de Proyecto',
-        getLabelFromValue(TIPOS_PROYECTO, req.tipoProyecto)
-    ));
-
-    header.appendChild(stats);
-    return header;
-}
-
-function createReviewStat(label, value, iconName, valueModifier) {
-    const stat = document.createElement('div');
-    stat.className = 'review-stat';
-
-    const labelEl = document.createElement('span');
-    labelEl.className = 'review-stat__label';
-    labelEl.textContent = label;
-    stat.appendChild(labelEl);
-
-    const valueEl = document.createElement('div');
-    valueEl.className = 'review-stat__value';
-    if (valueModifier) {
-        valueEl.classList.add(valueModifier);
-    }
-    if (iconName) {
-        valueEl.appendChild(createIcon(iconName));
-    }
-    const valueText = document.createElement('span');
-    valueText.textContent = value || '—';
-    valueEl.appendChild(valueText);
-
-    stat.appendChild(valueEl);
-    return stat;
-}
-
-function getRiskLabel(prioridad) {
-    if (prioridad === 'alta') return 'Alto';
-    if (prioridad === 'media') return 'Medio';
-    if (prioridad === 'baja') return 'Bajo';
-    return 'Sin definir';
-}
-
-function getRiskIcon(prioridad) {
-    if (prioridad === 'alta') return 'warning';
-    if (prioridad === 'media') return 'info';
-    return 'shield';
-}
-
-function getRiskValueClass(prioridad) {
-    if (prioridad === 'alta') return 'review-stat__value--danger';
-    if (prioridad === 'media') return 'review-stat__value--secondary';
-    return '';
-}
-
-function createReviewPreviewBody(req) {
-    const body = document.createElement('div');
-    body.className = 'review-preview__body';
-
-    body.appendChild(createReviewSection(
-        'description',
-        'Resumen Ejecutivo',
-        req.necesidad || 'No se registró un resumen para esta solicitud.'
-    ));
-
-    const bento = document.createElement('div');
-    bento.className = 'review-bento';
-    bento.appendChild(createFinancialSection(req));
-    bento.appendChild(createStrategicSection(req));
-    body.appendChild(bento);
-
-    body.appendChild(createReviewSection(
-        'insights',
-        'Impacto Esperado',
-        req.impacto || 'No se registró el impacto esperado.'
-    ));
-
-    if (req.comments && req.comments.length > 0) {
-        body.appendChild(createReviewCommentsSection(req));
-    }
-
-    return body;
-}
-
-function createReviewSection(iconName, title, text) {
-    const section = document.createElement('section');
-    section.className = 'review-section';
-
-    const titleEl = document.createElement('h3');
-    titleEl.className = 'review-section__title';
-    titleEl.appendChild(createIcon(iconName));
-    const titleText = document.createElement('span');
-    titleText.textContent = title;
-    titleEl.appendChild(titleText);
-    section.appendChild(titleEl);
-
-    const paragraphs = String(text).split(/\n{2,}/);
-    paragraphs.forEach((paragraph) => {
-        const p = document.createElement('p');
-        p.className = 'review-section__text';
-        p.textContent = paragraph;
-        section.appendChild(p);
-    });
-
-    return section;
-}
-
-function createFinancialSection(req) {
-    const section = document.createElement('section');
-    section.className = 'review-section';
-
-    const titleEl = document.createElement('h3');
-    titleEl.className = 'review-section__title';
-    titleEl.appendChild(createIcon('payments'));
-    const titleText = document.createElement('span');
-    titleText.textContent = 'Impacto Financiero';
-    titleEl.appendChild(titleText);
-    section.appendChild(titleEl);
-
-    const total = Number(req.presupuestoEstimado) || 0;
-    const capex = Math.round(total * 0.65);
-    const opex = total - capex;
-    const capexPct = total > 0 ? (capex / total) * 100 : 0;
-    const opexPct = total > 0 ? (opex / total) * 100 : 0;
-
-    section.appendChild(createBudgetRow('CAPEX (Año 1)', formatCurrency(capex), capexPct, 'review-bento__bar-fill--primary'));
-    section.appendChild(createBudgetRow('OPEX de Transición', formatCurrency(opex), opexPct, 'review-bento__bar-fill--secondary'));
-
-    const kpi = document.createElement('div');
-    kpi.className = 'review-bento__kpi';
-    const kpiLabel = document.createElement('span');
-    kpiLabel.className = 'review-stat__label';
-    kpiLabel.textContent = 'Presupuesto Total Estimado';
-    kpi.appendChild(kpiLabel);
-    const kpiValue = document.createElement('div');
-    kpiValue.className = 'review-stat__value';
-    kpiValue.textContent = formatCurrency(total);
-    kpi.appendChild(kpiValue);
-    section.appendChild(kpi);
-
-    return section;
-}
-
-function createBudgetRow(label, value, percent, fillModifier) {
-    const row = document.createElement('div');
-    row.className = 'review-bento__row';
-
-    const head = document.createElement('div');
-    head.className = 'review-bento__row-head';
-
-    const labelEl = document.createElement('span');
-    labelEl.textContent = label;
-    head.appendChild(labelEl);
-
-    const valueEl = document.createElement('span');
-    valueEl.className = 'review-bento__row-value';
-    valueEl.textContent = value;
-    head.appendChild(valueEl);
-
-    row.appendChild(head);
-
-    const bar = document.createElement('div');
-    bar.className = 'review-bento__bar';
-    const fill = document.createElement('div');
-    fill.className = `review-bento__bar-fill ${fillModifier}`;
-    fill.style.width = `${Math.max(0, Math.min(100, percent))}%`;
-    bar.appendChild(fill);
-    row.appendChild(bar);
-
-    return row;
-}
-
-function createStrategicSection(req) {
-    const section = document.createElement('section');
-    section.className = 'review-section';
-
-    const titleEl = document.createElement('h3');
-    titleEl.className = 'review-section__title';
-    titleEl.appendChild(createIcon('flag'));
-    const titleText = document.createElement('span');
-    titleText.textContent = 'Alineación Estratégica';
-    titleEl.appendChild(titleText);
-    section.appendChild(titleEl);
-
-    const list = document.createElement('ul');
-    list.className = 'review-bento__list';
-
-    const items = [
-        {
-            title: `Área solicitante: ${getLabelFromValue(AREAS, req.area)}`,
-            sub: 'Respalda las prioridades del área usuaria.'
-        },
-        {
-            title: `Tipo de proyecto: ${getLabelFromValue(TIPOS_PROYECTO, req.tipoProyecto)}`,
-            sub: 'Clasificación de iniciativa dentro del portafolio.'
-        },
-        {
-            title: `Prioridad sugerida: ${getLabelFromValue(PRIORIDADES, req.prioridad)}`,
-            sub: 'Define la urgencia de atención por parte del comité.'
-        }
-    ];
-
-    items.forEach((item) => {
-        const li = document.createElement('li');
-        li.className = 'review-bento__item';
-        li.appendChild(createIcon('check_circle'));
-        const content = document.createElement('div');
-        const title = document.createElement('span');
-        title.className = 'review-bento__item-title';
-        title.textContent = item.title;
-        content.appendChild(title);
-        const sub = document.createElement('span');
-        sub.className = 'review-bento__item-sub';
-        sub.textContent = item.sub;
-        content.appendChild(sub);
-        li.appendChild(content);
-        list.appendChild(li);
-    });
-
-    section.appendChild(list);
-    return section;
-}
-
-function createReviewCommentsSection(req) {
-    const section = document.createElement('section');
-    section.className = 'review-section';
-
-    const titleEl = document.createElement('h3');
-    titleEl.className = 'review-section__title';
-    titleEl.appendChild(createIcon('forum'));
-    const titleText = document.createElement('span');
-    titleText.textContent = `Historial de Comentarios (${req.comments.length})`;
-    titleEl.appendChild(titleText);
-    section.appendChild(titleEl);
-
-    const comments = document.createElement('div');
-    comments.className = 'comments';
-    req.comments
-        .slice()
-        .sort((a, b) => a.date.localeCompare(b.date))
-        .forEach((comment) => {
-            const commentEl = document.createElement('div');
-            commentEl.className = 'comment';
-
-            const header = document.createElement('div');
-            header.className = 'comment__header';
-            const author = document.createElement('span');
-            author.className = 'comment__author';
-            author.textContent = comment.author;
-            header.appendChild(author);
-            const date = document.createElement('span');
-            date.className = 'comment__date';
-            date.textContent = formatDate(comment.date);
-            header.appendChild(date);
-            commentEl.appendChild(header);
-
-            const text = document.createElement('p');
-            text.className = 'comment__text';
-            text.textContent = comment.text;
-            commentEl.appendChild(text);
-
-            comments.appendChild(commentEl);
-        });
-
-    section.appendChild(comments);
-    return section;
-}
-
-function createReviewActionsFooter(req) {
-    const footer = document.createElement('footer');
-    footer.className = 'review-actions-footer';
-
-    const commentField = createFormField({
-        id: `admin-comment-${req.id}`,
-        label: 'Comentarios del Administrador',
-        type: 'textarea',
-        rows: 2,
-        placeholder: 'Justifique la decisión (obligatorio para rechazos o solicitudes de ajuste).'
-    });
-    footer.appendChild(commentField.group);
-
-    const currentStage  = req.stage || STAGE.PMO;
-    const isLastStage   = currentStage === STAGE.DIRECTOR;
-    const nextStage     = isLastStage ? null : STAGE_ORDER[STAGE_ORDER.indexOf(currentStage) + 1];
-
-    const buttons = document.createElement('div');
-    buttons.className = 'review-actions-footer__buttons';
-
-    const addComment = (text) => {
-        if (!req.comments) req.comments = [];
-        req.comments.push({
-            author: AppState.currentUser.email,
-            date: new Date().toISOString().split('T')[0],
-            text
-        });
-    };
-
-    const handleApprove = () => {
-        const commentText = commentField.input.value.trim();
-
-        if (isLastStage) {
-            addComment(commentText || `Solicitud aprobada por ${AppState.currentUser.email}.`);
-            req.status = STATUS.APPROVED;
-            saveState();
-            showNotification(`Solicitud ${formatRequestId(req.id)} aprobada correctamente.`, 'success');
-        } else {
-            addComment(commentText || `Fase ${STAGE_LABELS[currentStage]} aprobada. Avanza a ${STAGE_LABELS[nextStage]}.`);
-            req.stage = nextStage;
-            saveState();
-            showNotification(`Solicitud avanzada a ${STAGE_LABELS[nextStage]}.`, 'success');
-        }
-
-        renderPanelAprobacion();
-    };
-
-    const handleChanges = () => {
-        const commentText = commentField.input.value.trim();
-        if (commentText.length < 3) {
-            showFieldError(commentField.input, 'Debe incluir un comentario que indique los ajustes requeridos.');
-            showNotification('Indique el motivo antes de continuar.', 'error');
-            return;
-        }
-        addComment(commentText);
-        req.status = STATUS.CHANGES;
-        saveState();
-        showNotification(`Se solicitaron ajustes para ${formatRequestId(req.id)}.`, 'info');
-        renderPanelAprobacion();
-    };
-
-    const handleReject = () => {
-        const commentText = commentField.input.value.trim();
-        if (commentText.length < 3) {
-            showFieldError(commentField.input, 'Debe incluir un comentario que justifique el rechazo.');
-            showNotification('Indique el motivo antes de continuar.', 'error');
-            return;
-        }
-        addComment(commentText);
-        req.status = STATUS.REJECTED;
-        saveState();
-        showNotification(`Solicitud ${formatRequestId(req.id)} rechazada.`, 'error');
-        renderPanelAprobacion();
-    };
-
-    const approveBtnLabel = isLastStage
-        ? 'Aprobar Solicitud'
-        : `Aprobar ${STAGE_LABELS[currentStage]}`;
-
-    const rejectBtn  = createButton('Rechazar', 'danger', 'cancel', handleReject);
-    const changesBtn = createButton('Solicitar Ajustes', 'secondary', 'edit_note', handleChanges);
-    const approveBtn = createButton(approveBtnLabel, 'primary', 'check', handleApprove);
-
-    buttons.appendChild(rejectBtn);
-    buttons.appendChild(changesBtn);
-    buttons.appendChild(approveBtn);
-
-    footer.appendChild(buttons);
-    return footer;
-}
-
-function createReviewReadOnlyFooter() {
-    const footer = document.createElement('footer');
-    footer.className = 'review-actions-footer';
-
-    const notice = document.createElement('p');
-    notice.className = 'text-body-sm text-outline';
-    notice.textContent = 'Esta solicitud fue aprobada y está lista para ejecución en el portafolio.';
-    footer.appendChild(notice);
-
-    return footer;
+    })();
 }
 
 /* ----------------------------- Métricas --------------------------------- */
@@ -5265,6 +5686,173 @@ function _chartCard(title, subtitle) {
         card.appendChild(p);
     }
     return card;
+}
+
+/**
+ * Gráfico tipo “Compute and Disk” del panel: Database | WAL | Sistema/Disponible.
+ * Los dos primeros tramos (pg_database_size, pg_ls_waldir) miden en bytes reales; el
+ * tercer bloque no se puede obtener vía SQL en el nodo, solo referencia a Supabase.
+ */
+function createStorageComputeDiskPanel(databaseBytes, walBytes) {
+    const db = Math.max(0, Number(databaseBytes) || 0);
+    const wal = Math.max(0, Number(walBytes) || 0);
+    const sum = db + wal;
+    const card = document.createElement('div');
+    card.className = 'chart-card storage-compute';
+
+    const h3 = document.createElement('h3');
+    h3.className = 'chart-card__title';
+    h3.textContent = 'Compute y disco';
+    card.appendChild(h3);
+    const sub = document.createElement('p');
+    sub.className = 'chart-card__subtitle';
+    sub.textContent = 'Database, WAL, sistema (espacio en panel Supabase).';
+    card.appendChild(sub);
+
+    if (sum <= 0) {
+        const empty = document.createElement('p');
+        empty.className = 'comments__empty';
+        empty.textContent = 'Sin datos de tamaño.';
+        card.appendChild(empty);
+        return card;
+    }
+
+    const barWrap = document.createElement('div');
+    barWrap.className = 'storage-compute__bar';
+    const mid = document.createElement('div');
+    mid.className = 'storage-compute__bar-mid';
+    mid.setAttribute('role', 'img');
+    mid.setAttribute('aria-label', 'Reparto Database y WAL respecto a su suma');
+
+    const segDb = document.createElement('div');
+    segDb.className = 'storage-compute__seg storage-compute__seg--db';
+    const segWal = document.createElement('div');
+    segWal.className = 'storage-compute__seg storage-compute__seg--wal';
+    segDb.style.flex = String(Math.max(1, db));
+    segWal.style.flex = String(Math.max(1, wal));
+    segDb.title = 'Database: ' + formatBytes(db);
+    segWal.title = 'WAL: ' + formatBytes(wal);
+
+    const dbPct = (db / sum) * 100;
+    const walPct = (wal / sum) * 100;
+    const dlab = document.createElement('span');
+    dlab.className = 'storage-compute__seg-lbl';
+    dlab.textContent = 'Database ' + dbPct.toFixed(1).replace('.', ',') + ' %';
+    const wlab = document.createElement('span');
+    wlab.className = 'storage-compute__seg-lbl';
+    wlab.textContent = 'WAL ' + walPct.toFixed(1).replace('.', ',') + ' %';
+    segDb.appendChild(dlab);
+    segWal.appendChild(wlab);
+
+    mid.appendChild(segDb);
+    mid.appendChild(segWal);
+    barWrap.appendChild(mid);
+
+    const sys = document.createElement('div');
+    sys.className = 'storage-compute__bar-sys';
+    const st = document.createElement('span');
+    st.className = 'storage-compute__bar-sys-t';
+    st.textContent = 'Sistema / disponible';
+    const ss = document.createElement('span');
+    ss.className = 'storage-compute__bar-sys-s';
+    ss.textContent = 'Solo en panel Supabase';
+    sys.appendChild(st);
+    sys.appendChild(ss);
+    barWrap.appendChild(sys);
+    card.appendChild(barWrap);
+
+    const m = document.createElement('div');
+    m.className = 'storage-compute__metrics';
+    const addCol = (iconName, elLabel, valueText, micro, microClass) => {
+        const c = document.createElement('div');
+        c.className = 'storage-compute__metric';
+        c.appendChild(createIcon(iconName, 'storage-compute__metric-ic'));
+        const t = document.createElement('div');
+        t.className = 'storage-compute__metric-txt';
+        const lab = document.createElement('span');
+        lab.className = 'storage-compute__metric-lbl';
+        lab.textContent = elLabel;
+        const v = document.createElement('span');
+        v.className = 'storage-compute__metric-val';
+        v.textContent = valueText;
+        t.appendChild(lab);
+        t.appendChild(v);
+        if (micro) {
+            const mu = document.createElement('span');
+            mu.className = microClass || 'storage-compute__metric-mu';
+            mu.textContent = micro;
+            t.appendChild(mu);
+        }
+        c.appendChild(t);
+        m.appendChild(c);
+    };
+    addCol('database', 'Database', formatBytes(db), null, null);
+    addCol('sync_alt', 'WAL (write-ahead log)', formatBytes(wal), null, null);
+    addCol('tune', 'Sistema / Disponible', '—', 'Uso: Supabase → Project Settings (Compute & disk / Usage).', 'storage-compute__metric-mu');
+    card.appendChild(m);
+    return card;
+}
+
+/* ---- Admin: almacenamiento (plan gratuito) ---- */
+function renderAdminStorage() {
+    if (AppState.currentUser?.role !== ROLE_ADMIN) {
+        showNotification('Solo los administradores pueden acceder a esta sección.', 'error');
+        navigateToHome();
+        return;
+    }
+    AppState.currentView = 'admin_storage';
+    const canvas = createDashboardLayout('admin_storage');
+
+    canvas.appendChild(createPageHeader('Storage', 'Database · WAL · Sistema'));
+
+    const loading = document.createElement('p');
+    loading.className = 'text-body-md storage-usage__loading';
+    loading.textContent = 'Cargando…';
+    canvas.appendChild(loading);
+
+    void (async () => {
+        let stats;
+        try {
+            stats = await PMOSupabase.getAdminStorageStats();
+        } catch (e) {
+            console.error(e);
+            while (canvas.firstChild) {
+                canvas.removeChild(canvas.firstChild);
+            }
+            canvas.appendChild(createPageHeader('Storage', 'Database · WAL · Sistema'));
+            const errP = document.createElement('p');
+            errP.className = 'form-error';
+            const msg = (e && e.message) ? String(e.message) : String(e);
+            const isMissingRpc = msg.indexOf('get_admin_storage_stats') !== -1
+                || msg.toLowerCase().indexOf('function public.get_admin') !== -1
+                || (e && e.code === 'PGRST202');
+            errP.textContent = isMissingRpc
+                ? 'Falta o está desactualizada la función. En Supabase (SQL Editor), ejecute supabase/migrations/004_admin_storage_stats.sql y 005_storage_wal_and_compute_view.sql.'
+                : ('No se pudieron cargar las métricas: ' + msg);
+            canvas.appendChild(errP);
+            return;
+        }
+        if (!stats || typeof stats !== 'object') {
+            while (canvas.firstChild) {
+                canvas.removeChild(canvas.firstChild);
+            }
+            canvas.appendChild(createPageHeader('Storage', 'Database · WAL · Sistema'));
+            const errP2 = document.createElement('p');
+            errP2.className = 'form-error';
+            errP2.textContent = 'No se pudo leer el resultado. Revise conexión o RPC get_admin_storage_stats.';
+            canvas.appendChild(errP2);
+            return;
+        }
+
+        const dbTotal = Number(stats.database_total_bytes) || 0;
+        const walBytes = Number(stats.wal_bytes) || 0;
+
+        while (canvas.firstChild) {
+            canvas.removeChild(canvas.firstChild);
+        }
+        canvas.appendChild(createPageHeader('Storage', 'Database · WAL · Sistema'));
+        canvas.appendChild(createStorageComputeDiskPanel(dbTotal, walBytes));
+    })();
 }
 
 /* ---- renderMetricas ---- */
@@ -5727,14 +6315,24 @@ function renderDashboardPM(activeFilter) {
     AppState.currentView = 'dashboard_pm';
     const canvas = createDashboardLayout('dashboard_pm');
 
-    let needsSave = false;
-    AppState.requests.forEach(r => {
+    const toPersist = [];
+    AppState.requests.forEach((r) => {
         if ((r.status === STATUS.APPROVED || r.status === STATUS.CLOSED) && !r.implementation) {
             ensureImplementation(r);
-            needsSave = true;
+            toPersist.push(r);
         }
     });
-    if (needsSave) saveState();
+    if (toPersist.length) {
+        void (async () => {
+            try {
+                for (const r of toPersist) {
+                    await persistRequestUpdate(r);
+                }
+            } catch (e) {
+                /* notificado */
+            }
+        })();
+    }
 
     const allProjects = AppState.requests.filter(
         r => r.status === STATUS.APPROVED || r.status === STATUS.CLOSED
@@ -6210,6 +6808,14 @@ function createImplDocSection(req) {
         badge.textContent = docDef.required ? 'Requerido' : 'Opcional';
         item.appendChild(badge);
 
+        if (uploaded && uploaded.storagePath) {
+            const openBtn = createIconButton('open_in_new', 'Abrir archivo', () => {
+                openImplementationDocument(uploaded);
+            });
+            openBtn.classList.add('impl-doc-item__open');
+            item.appendChild(openBtn);
+        }
+
         docList.appendChild(item);
     });
 
@@ -6255,55 +6861,48 @@ function createAddDocForm(req, stageKey, stageConfig, onSuccess) {
     });
     form.appendChild(docTypeField.group);
 
-    const docNameField = createFormField({
-        id: `doc-name-${req.id}-${Date.now()}`,
-        label: 'Nombre del Archivo',
-        type: 'text',
-        required: true,
-        placeholder: 'Ej: Acta_Constitucion_v1.0.pdf'
-    });
-    form.appendChild(docNameField.group);
+    const fileGroup = document.createElement('div');
+    fileGroup.className = 'form-group';
+    const fileLabel = document.createElement('label');
+    fileLabel.className = 'form-label';
+    fileLabel.setAttribute('for', `doc-file-${req.id}-${Date.now()}`);
+    fileLabel.textContent = 'Archivo';
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.id = `doc-file-${req.id}`;
+    fileInput.className = 'form-input';
+    fileInput.setAttribute('aria-required', 'true');
+    fileGroup.appendChild(fileLabel);
+    fileGroup.appendChild(fileInput);
+    form.appendChild(fileGroup);
 
-    const docFormatField = createFormField({
-        id: `doc-format-${req.id}-${Date.now()}`,
-        label: 'Formato',
-        type: 'select',
-        required: true,
-        choices: [
-            { value: 'pdf',   label: 'PDF' },
-            { value: 'word',  label: 'Word (.docx)' },
-            { value: 'excel', label: 'Excel (.xlsx)' },
-            { value: 'ppt',   label: 'PowerPoint (.pptx)' },
-            { value: 'otro',  label: 'Otro' }
-        ]
-    });
-    form.appendChild(docFormatField.group);
-
-    const saveBtn = createButton('Guardar Documento', 'primary', 'save', () => {
+    const saveBtn = createButton('Subir documento', 'primary', 'upload', () => {
         const tag = docTypeField.input.value;
-        const docName = docNameField.input.value.trim();
-        const format = docFormatField.input.value;
-
         let hasError = false;
-        if (!tag) { showFieldError(docTypeField.input, 'Seleccione el tipo de documento.'); hasError = true; }
-        if (!docName) { showFieldError(docNameField.input, 'Ingrese el nombre del archivo.'); hasError = true; }
-        if (!format) { showFieldError(docFormatField.input, 'Seleccione el formato.'); hasError = true; }
-        if (hasError) return;
-
-        if (!req.implementation.documents[stageKey]) req.implementation.documents[stageKey] = [];
-
-        req.implementation.documents[stageKey].push({
-            id: `doc_${Date.now()}`,
-            tag,
-            name: docName,
-            format,
-            uploadedBy: AppState.currentUser.email,
-            uploadedAt: new Date().toISOString().split('T')[0]
-        });
-
-        saveState();
-        showNotification(`Documento "${docName}" agregado correctamente.`, 'success');
-        onSuccess();
+        if (!tag) {
+            showFieldError(docTypeField.input, 'Seleccione el tipo de documento.');
+            hasError = true;
+        }
+        if (!fileInput.files || !fileInput.files[0]) {
+            showFieldError(fileInput, 'Seleccione un archivo.');
+            hasError = true;
+        }
+        if (hasError) {
+            return;
+        }
+        void (async () => {
+            try {
+                if (!req.implementation.documents[stageKey]) {
+                    req.implementation.documents[stageKey] = [];
+                }
+                const name = fileInput.files[0].name;
+                await PMOData.uploadImplementationFile(req, stageKey, fileInput, tag);
+                showNotification(`Documento \"${name}\" agregado correctamente.`, 'success');
+                onSuccess();
+            } catch (err) {
+                showNotification(err.message || 'Error al subir el archivo.', 'error');
+            }
+        })();
     });
 
     form.appendChild(saveBtn);
@@ -6364,15 +6963,24 @@ function createImplCommentsSection(req) {
 
         const saveBtn = createButton('Guardar Nota', 'secondary', 'save', () => {
             const text = commentField.input.value.trim();
-            if (text.length < 3) { showFieldError(commentField.input, 'Ingrese al menos 3 caracteres.'); return; }
-            impl.comments.push({
-                author: AppState.currentUser.email,
-                date: new Date().toISOString().split('T')[0],
-                text
-            });
-            saveState();
-            showNotification('Nota registrada en la bitácora.', 'success');
-            renderDetallePM(req.id);
+            if (text.length < 3) {
+                showFieldError(commentField.input, 'Ingrese al menos 3 caracteres.');
+                return;
+            }
+            void (async () => {
+                try {
+                    impl.comments.push({
+                        author: AppState.currentUser.email,
+                        date: new Date().toISOString().split('T')[0],
+                        text: text
+                    });
+                    await persistRequestUpdate(req);
+                    showNotification('Nota registrada en la bitácora.', 'success');
+                    renderDetallePM(req.id);
+                } catch (e) {
+                    /* notificado */
+                }
+            })();
         });
         card.appendChild(saveBtn);
     }
@@ -6413,27 +7021,37 @@ function createImplActionFooter(req) {
                 return;
             }
             const today = new Date().toISOString().split('T')[0];
-            if (isLast) {
-                impl.comments.push({
-                    author: AppState.currentUser.email,
-                    date: today,
-                    text: 'Proyecto cerrado exitosamente. Todos los entregables de Cierre registrados.'
-                });
-                req.status = STATUS.CLOSED;
-                saveState();
-                showNotification(`Proyecto ${formatRequestId(req.id)} cerrado exitosamente.`, 'success');
-            } else {
-                impl.stage = nextKey;
-                impl.stageHistory.push({ stage: nextKey, movedAt: today, movedBy: AppState.currentUser.email });
-                impl.comments.push({
-                    author: AppState.currentUser.email,
-                    date: today,
-                    text: `Proyecto avanzado de "${currentConfig.label}" a "${nextConfig.label}".`
-                });
-                saveState();
-                showNotification(`Proyecto avanzado a "${nextConfig.label}".`, 'success');
-            }
-            renderDetallePM(req.id);
+            void (async () => {
+                try {
+                    if (isLast) {
+                        impl.comments.push({
+                            author: AppState.currentUser.email,
+                            date: today,
+                            text: 'Proyecto cerrado exitosamente. Todos los entregables de Cierre registrados.'
+                        });
+                        req.status = STATUS.CLOSED;
+                        await persistRequestUpdate(req);
+                        showNotification(`Proyecto ${formatRequestId(req.id)} cerrado exitosamente.`, 'success');
+                    } else {
+                        impl.stage = nextKey;
+                        impl.stageHistory.push({
+                            stage: nextKey,
+                            movedAt: today,
+                            movedBy: AppState.currentUser.email
+                        });
+                        impl.comments.push({
+                            author: AppState.currentUser.email,
+                            date: today,
+                            text: `Proyecto avanzado de "${currentConfig.label}" a "${nextConfig.label}".`
+                        });
+                        await persistRequestUpdate(req);
+                        showNotification(`Proyecto avanzado a "${nextConfig.label}".`, 'success');
+                    }
+                    renderDetallePM(req.id);
+                } catch (e) {
+                    /* notificado */
+                }
+            })();
         }
     );
 
@@ -6885,18 +7503,78 @@ function createDocsViewItem(uploaded, docDef, hasDoc) {
     badge.textContent = docDef.required ? 'Requerido' : 'Opcional';
     item.appendChild(badge);
 
+    if (hasDoc && uploaded.storagePath) {
+        const openBtn = createIconButton('open_in_new', 'Abrir archivo', () => {
+            openImplementationDocument(uploaded);
+        });
+        openBtn.classList.add('docs-view-item__open');
+        item.appendChild(openBtn);
+    }
+
     return item;
 }
 
 /* --------------------------- Inicialización ----------------------------- */
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadState();
     ensureNotificationsContainer();
+    void initApp();
+});
 
-    if (AppState.currentUser) {
+async function initApp() {
+    if (typeof PMOSupabase === 'undefined' || typeof PMOData === 'undefined') {
+        showNotification('Falta cargar supabaseClient.js o pmoData.js.', 'error');
+        navigateTo('landing');
+        return;
+    }
+    if (!PMOSupabase.isConfigValid()) {
+        showNotification('Falta URL de Supabase y clave anon (eyJ…) en el archivo de config.', 'error');
+        navigateTo('landing');
+        return;
+    }
+    const initialHash = (typeof window !== 'undefined' && window.location.hash) ? window.location.hash : '';
+    const likelyRecovery = /type=recovery|type%3Drecovery/i.test(initialHash);
+
+    const sb = PMOSupabase.getSupabase();
+    sb.auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_OUT') {
+            AppState.currentUser = null;
+            AppState.requests = [];
+        } else if (event === 'PASSWORD_RECOVERY') {
+            ensureNotificationsContainer();
+            doRenderNuevaContrasenaForm();
+        }
+    });
+
+    let sessionData = (await sb.auth.getSession()).data;
+    if (!sessionData.session && likelyRecovery) {
+        await new Promise((r) => setTimeout(r, 500));
+        sessionData = (await sb.auth.getSession()).data;
+    }
+    if (sessionData.session && likelyRecovery) {
+        ensureNotificationsContainer();
+        doRenderNuevaContrasenaForm();
+        return;
+    }
+    if (!sessionData.session) {
+        if (likelyRecovery) {
+            showNotification('El enlace de recuperación expiró o no es válido. Solicite uno nuevo (¿Olvidó su contraseña?).', 'error');
+        }
+        navigateTo('landing');
+        return;
+    }
+    try {
+        const profile = await PMOSupabase.fetchCurrentProfile();
+        const ok = await applyProfileAfterAuth(profile);
+        if (!ok) {
+            navigateTo('login');
+            return;
+        }
+        await refreshRequestsFromServer();
         navigateToHome();
-    } else {
+    } catch (e) {
+        console.error(e);
+        showNotification('No se pudo restaurar la sesión. Inicie sesión de nuevo.', 'error');
         navigateTo('login');
     }
-});
+}
